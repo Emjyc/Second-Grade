@@ -1,937 +1,807 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Unjumble the Sentence</title>
-<link href="https://fonts.googleapis.com/css2?family=Nico+Moji&display=swap" rel="stylesheet" />
-<style>
-  body {
-    font-family: 'Nico Moji', sans-serif;
-    background: linear-gradient(to bottom, #ffe3e3, #f5f5dc);
-    margin: 0; padding: 0;
-    color: #333;
-    transition: background-color 0.3s, color 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-  }
-  body.dark {
-    background: linear-gradient(to bottom, #2c3e50, #34495e);
-    color: #ddd;
-  }
-  #themeToggle {
-    position: fixed;
-    top: 10px; right: 10px; z-index: 1000;
-    cursor: pointer;
-    border-radius: 10px;
-    border: none;
-    background-color: #ffdac1;
-    padding: 8px 12px;
-    font-size: 1rem;
-    transition: background-color 0.3s;
-  }
-  body.dark #themeToggle {
-    background-color: #bb8fce;
-    color: #f7f1ff;
-  }
-  #start-screen {
-    display: flex;
-    width: 100%;
-    max-width: 900px;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-  #start-left {
-    width: 280px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  #nickname-container {
-    display: flex;
-    flex-direction: column;
-  }
-  #nickname-container label {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  #nickname {
-    padding: 8px 12px;
-    border-radius: 15px;
-    border: 2px solid #a2d2ff;
-    font-size: 1.1rem;
-    outline: none;
-    transition: border-color 0.3s;
-  }
-  #nickname:focus {
-    border-color: #6c7ae0;
-  }
-  #leaderboard {
-    background: #fef9f1;
-    border-radius: 15px;
-    padding: 10px 15px;
-    max-height: 280px;
-    overflow-y: auto;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-  }
-  body.dark #leaderboard {
-    background: #6e5494;
-    color: #eee;
-    box-shadow: none;
-  }
-  #leaderboard h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.2rem;
-    text-align: center;
-  }
-  #leaderboard ol {
-    padding-left: 20px;
-    margin: 0;
-  }
-  #leaderboard li {
-    margin: 4px 0;
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-  }
-
-  #start-right {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  #start-right h1 {
-    font-size: 3rem;
-    margin-bottom: 25px;
-    background: #ffd6ec;
-    padding: 10px 20px;
-    border-radius: 30px;
-    width: 100%;
-    max-width: 500px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(255, 150, 200, 0.6);
-    user-select: none;
-  }
-  body.dark #start-right h1 {
-    background: #8e44ad;
-    color: #f0e5f9;
-    box-shadow: 0 4px 12px rgba(150, 100, 255, 0.8);
-  }
-  .grammar-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%;
-    max-width: 320px;
-  }
-  .grammar-button {
-    font-size: 1.4rem;
-    padding: 14px 0;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    background: #a2d2ff;
-    transition: background-color 0.3s, transform 0.2s;
-    box-shadow: 0 4px 8px #82b1ff;
-    user-select: none;
-  }
-  .grammar-button:hover, .grammar-button:focus {
-    background: #6c7ae0;
-    color: #fff;
-    transform: translateY(-4px);
-    outline: none;
-  }
-  body.dark .grammar-button {
-    background: #6c7ae0;
-    box-shadow: 0 4px 8px #4a4fbc;
-    color: #f0e5f9;
-  }
-  body.dark .grammar-button:hover {
-    background: #a2d2ff;
-    color: #222;
-  }
-
-  /* GAME SCREEN */
-
-  #game-screen {
-    display: none;
-    width: 100%;
-    max-width: 900px;
-    padding: 20px;
-    box-sizing: border-box;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  #game-screen.active {
-    display: flex;
-  }
-  #game-title {
-    font-size: 2.7rem;
-    margin-bottom: 10px;
-    background: #ffd6ec;
-    padding: 10px 25px;
-    border-radius: 30px;
-    user-select: none;
-    box-shadow: 0 4px 10px rgba(255,150,200,0.7);
-  }
-  body.dark #game-title {
-    background: #8e44ad;
-    color: #f0e5f9;
-    box-shadow: 0 4px 12px rgba(150,100,255,0.8);
-  }
-  #translation {
-    font-size: 1.5rem;
-    color: #555;
-    margin-bottom: 15px;
-    user-select: none;
-  }
-  body.dark #translation {
-    color: #ccc;
-  }
-  #progress-container {
-    width: 80%;
-    max-width: 500px;
-    height: 20px;
-    background: #ddd;
-    border-radius: 15px;
-    margin-bottom: 25px;
-    overflow: hidden;
-  }
-  body.dark #progress-container {
-    background: #555;
-  }
-  #progress-bar {
-    height: 100%;
-    background: #a2d2ff;
-    width: 0%;
-    transition: width 0.5s ease;
-  }
-  body.dark #progress-bar {
-    background: #6c7ae0;
-  }
-
-  #drop-zone {
-    display: flex;
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 10px;
-    margin-bottom: 20px;
-    min-height: 60px;
-  }
-  .word-slot {
-    flex: 1 1 0;
-    min-width: 80px;
-    border-bottom: 3px dashed #ccc;
-    border-radius: 15px;
-    padding: 6px 8px;
-    box-sizing: border-box;
-    user-select: none;
-    transition: border-color 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  body.dark .word-slot {
-    border-color: #999;
-  }
-
-  #word-bank {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 25px;
-  }
-  .word {
-    background: #fff8dc;
-    padding: 10px 18px;
-    border-radius: 18px;
-    font-size: 2rem;
-    cursor: grab;
-    user-select: none;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-    transition: background-color 0.3s, color 0.3s;
-  }
-  body.dark .word {
-    background: #7f8c8d;
-    color: #eee;
-    box-shadow: none;
-  }
-  .word.correct {
-    background-color: #d4edda;
-    color: green;
-  }
-  .word.wrong {
-    background-color: #f8d7da;
-    color: red;
-  }
-  .word:active {
-    transform: scale(1.1);
-  }
-
-  button {
-    font-size: 1rem;
-    padding: 10px 20px;
-    margin: 5px 10px;
-    border-radius: 15px;
-    border: none;
-    cursor: pointer;
-    background-color: #ffdac1;
-    box-shadow: 0 4px 8px #ffb681;
-    transition: background-color 0.3s, transform 0.2s;
-    user-select: none;
-  }
-  button:hover, button:focus {
-    background-color: #ffb681;
-    transform: translateY(-4px);
-    outline: none;
-  }
-  body.dark button {
-    background-color: #bb8fce;
-    color: #f7f1ff;
-    box-shadow: 0 4px 8px #9d7acc;
-  }
-  body.dark button:hover {
-    background-color: #a07ed1;
-    color: #fff;
-  }
-
-  #hintBtn {
-    animation: glowPulse 2s infinite;
-  }
-
-  #tick {
-    font-size: 3rem;
-    color: green;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    user-select: none;
-  }
-  #tick.show {
-    opacity: 1;
-  }
-
-  #score {
-    font-size: 2.3rem;
-    letter-spacing: 6px;
-    margin-bottom: 20px;
-    min-height: 2.8rem;
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-  }
-  .star {
-    position: relative;
-    display: inline-block;
-    font-size: 1.8rem;
-    cursor: default;
-  }
-  .star.popburst {
-    animation: popBurstScale 0.5s ease forwards;
-  }
-  .star.popburst::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 1.6em;
-    height: 1.6em;
-    background: radial-gradient(circle, #ffd700 40%, transparent 70%);
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    animation: burst 0.5s ease forwards;
-    z-index: -1;
-  }
-
-  #mission-tracker {
-    font-size: 1.1rem;
-    margin-bottom: 25px;
-    user-select: none;
-  }
-
-  /* Pop & Color Burst Animation for stars */
-  @keyframes popBurstScale {
-    0% {
-      transform: scale(0);
-      opacity: 0;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unjumble Time</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nico+Moji&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Nico Moji', sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      background: linear-gradient(to bottom, #fff1dd, #ffd18d);
+      color: #333;
+      transition: background-color 0.5s, color 0.5s;
     }
-    60% {
-      transform: scale(1.4);
-      opacity: 1;
+    body.dark {
+      background: #1e1e2f;
+      color: #ddd;
     }
-    100% {
-      transform: scale(1);
-    }
-  }
-  @keyframes burst {
-    0% {
-      opacity: 0.6;
-      transform: scale(0);
-    }
-    70% {
-      opacity: 0;
-      transform: scale(1.6);
-    }
-    100% {
-      opacity: 0;
-      transform: scale(1.6);
-    }
-  }
 
-  /* Glow pulse for hint button */
-  @keyframes glowPulse {
-    0%, 100% { box-shadow: 0 0 6px 2px #ffdd55; }
-    50% { box-shadow: 0 0 14px 6px #fff066; }
-  }
-
-  /* Confetti container */
-  #confetti-container {
-    pointer-events: none;
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    overflow: visible;
-    z-index: 1000;
-  }
-  .confetti {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background-color: #ffda44;
-    opacity: 0.9;
-    border-radius: 2px;
-    animation-name: confetti-fall;
-    animation-timing-function: linear;
-  }
-  @keyframes confetti-fall {
-    0% {
-      transform: translateY(0) rotate(0deg);
-      opacity: 1;
+    h1 {
+      font-size: 2.5em;
+      margin: 1rem;
+      background: #f4a261;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      display: inline-block;
+      transition: background-color 0.5s;
     }
-    100% {
-      transform: translateY(100vh) rotate(360deg);
-      opacity: 0;
+    body.dark h1 {
+      background: #bb8453;
     }
-  }
 
-</style>
+    .grammar-button {
+      font-size: 1.2rem;
+      margin: 10px;
+      padding: 12px 24px;
+      cursor: pointer;
+      border: none;
+      border-radius: 12px;
+      background: #f4a261;
+      color: #2d2d2d;
+      transition: background 0.3s, color 0.3s;
+    }
+    .grammar-button:hover {
+      background: #e76f51;
+      color: white;
+    }
+    body.dark .grammar-button {
+      background: #bb8453;
+      color: #eee;
+    }
+    body.dark .grammar-button:hover {
+      background: #cc6f4a;
+      color: #fff;
+    }
+
+    #nickname {
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      width: 200px;
+      text-align: center;
+      transition: background-color 0.5s, color 0.5s, border-color 0.5s;
+    }
+    body.dark #nickname {
+      background: #33354a;
+      color: #ddd;
+      border-color: #666;
+    }
+
+    #leaderboard {
+      width: 220px;
+      margin: 0 auto 20px;
+      background: #ffeccf;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: left;
+      font-size: 0.9rem;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    body.dark #leaderboard {
+      background: #2a2a3e;
+      color: #ccc;
+    }
+
+    #leaderboard h3 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    #leaderboard-list {
+      padding-left: 20px;
+      margin: 0;
+    }
+
+    #grammar-select {
+      margin-bottom: 20px;
+    }
+
+    #translation {
+      font-size: 1.5rem;
+      color: #555;
+      margin: 10px 0;
+      min-height: 2em;
+      transition: color 0.5s;
+    }
+    body.dark #translation {
+      color: #aaa;
+    }
+
+    #mission-tracker {
+      margin: 10px 0;
+      font-size: 1rem;
+      color: #4b4b4b;
+      min-height: 1.2em;
+      transition: color 0.5s;
+    }
+    body.dark #mission-tracker {
+      color: #bbb;
+    }
+
+    #word-bank,
+    #drop-zone {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+      max-width: 700px;
+      min-height: 50px;
+    }
+
+    .word {
+      font-size: 2rem;
+      padding: 12px 20px;
+      cursor: grab;
+      border-radius: 15px;
+      background: #ffeccf;
+      color: #333;
+      box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+      user-select: none;
+      transition: transform 0.2s ease, background-color 0.3s;
+      min-width: max-content;
+      user-select: none;
+    }
+    .word:active {
+      transform: scale(1.05);
+    }
+    body.dark .word {
+      background: #4a4a62;
+      color: #ddd;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .word.correct {
+      background-color: #c8e6c9 !important;
+      color: #256029 !important;
+    }
+    body.dark .word.correct {
+      background-color: #357a35 !important;
+      color: #d0f5d0 !important;
+    }
+
+    .word.wrong {
+      background-color: #f08080 !important;
+      color: #fff !important;
+    }
+    body.dark .word.wrong {
+      background-color: #a03a3a !important;
+      color: #fff !important;
+    }
+
+    button {
+      font-size: 1rem;
+      margin: 10px 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 10px;
+      border: none;
+      background-color: #f4a261;
+      color: #2d2d2d;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #e76f51;
+      color: white;
+    }
+    body.dark button {
+      background-color: #bb8453;
+      color: #eee;
+    }
+    body.dark button:hover {
+      background-color: #cc6f4a;
+      color: #fff;
+    }
+
+    #tick {
+      font-size: 3rem;
+      color: #2ecc71;
+      display: none;
+      animation: pop 0.5s ease-in-out;
+      margin: 10px auto;
+    }
+
+    #score {
+      font-size: 1.2rem;
+      margin-top: 10px;
+      color: #333;
+      min-height: 1.4em;
+      transition: color 0.5s;
+    }
+    body.dark #score {
+      color: #ddd;
+    }
+
+    .word-slot {
+      min-width: 100px;
+      min-height: 40px;
+      margin: 5px;
+      border-bottom: 2px dashed #7a9ea3;
+      padding: 5px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: #fff1dd;
+      transition: background-color 0.5s, border-color 0.5s;
+    }
+    body.dark .word-slot {
+      background: #2c2c44;
+      border-color: #5a6172;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    #custom-sentence-area {
+      margin: 20px auto;
+      max-width: 700px;
+      text-align: left;
+      background: #fff3d3;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      transition: background-color 0.5s;
+    }
+    body.dark #custom-sentence-area {
+      background: #3b3b58;
+      color: #ddd;
+    }
+    #custom-sentence-area label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    #custom-sentence-area input[type="text"],
+    #custom-sentence-area select {
+      width: 100%;
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      transition: background-color 0.5s, color 0.5s, border-color 0.5s;
+    }
+    body.dark #custom-sentence-area input[type="text"],
+    body.dark #custom-sentence-area select {
+      background: #282a40;
+      border-color: #666;
+      color: #ddd;
+    }
+    #custom-sentence-area button {
+      margin-top: 10px;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    #theme-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 10px 15px;
+      border-radius: 20px;
+      background: #f4a261;
+      color: #2d2d2d;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      z-index: 1000;
+      transition: background-color 0.3s;
+    }
+    #theme-toggle:hover {
+      background: #e76f51;
+      color: white;
+    }
+    body.dark #theme-toggle {
+      background: #bb8453;
+      color: #eee;
+    }
+    body.dark #theme-toggle:hover {
+      background: #cc6f4a;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-<button id="themeToggle">🌙 Dark Mode</button>
+  <button id="theme-toggle">Dark Mode</button>
 
-<div id="start-screen" class="active">
-  <div id="start-left">
-    <div id="nickname-container">
-      <label for="nickname">Your Nickname</label>
-      <input type="text" id="nickname" maxlength="15" placeholder="Enter nickname" autocomplete="off" />
-      <button id="clearProgressBtn" style="margin-top:10px;">Clear Progress</button>
-    </div>
+  <h1>Unjumble Time</h1>
 
-    <div id="leaderboard">
-      <h3>Leaderboard - Top 10 ⭐</h3>
-      <ol id="leaderboard-list"></ol>
-    </div>
+  <input id="nickname" placeholder="Enter your nickname" />
+
+  <div id="leaderboard">
+    <h3>Leaderboard</h3>
+    <ol id="leaderboard-list"></ol>
   </div>
 
-  <div id="start-right">
-    <h1>文法を選ぼう</h1>
-    <div class="grammar-list">
-      <button class="grammar-button" data-set="future">未来形 🚀</button>
-      <button class="grammar-button" data-set="if">もし… ☁️</button>
-      <button class="grammar-button" data-set="when">〜するとき ⏰</button>
-      <button class="grammar-button" data-set="think">…と思う 💭</button>
-      <button class="grammar-button" data-set="want">すること１ 💖</button>
-      <button class="grammar-button" data-set="purpose">すること２ 🌱</button>
-      <button class="grammar-button" data-set="must">しなければならない 🔒</button>
-      <button class="grammar-button" data-set="mustNot">してはいけない 🚫</button>
-    </div>
-  </div>
-</div>
+  <div id="grammar-select"></div>
 
-<div id="game-screen">
-  <h1 id="game-title"></h1>
   <div id="translation"></div>
 
-  <div id="progress-container">
-    <div id="progress-bar"></div>
-  </div>
+  <div id="mission-tracker"></div>
 
   <div id="drop-zone"></div>
   <div id="word-bank"></div>
-  <button id="hintBtn" onclick="showHint()">💡 Hint</button>
-  <button onclick="replayAudio()">🔊 Replay</button>
-  <button id="nextBtn" onclick="nextSentence()" style="opacity:0; transition: opacity 0.4s;">➡️ Next</button>
+
   <div id="tick">✔️</div>
-  <div id="score"></div>
-  <div id="mission-tracker"></div>
-</div>
+  <div id="score">⭐ Score: 0</div>
 
-<div id="confetti-container"></div>
+  <button id="hint">💡 Hint</button>
+  <button id="replay">🔊 Replay</button>
+  <button id="next" style="display:none;">Next Sentence</button>
 
-<script>
-  // SENTENCE SETS with 5 sentences each
-  const sentenceSets = {
-    future: [
-      { en: "I will play soccer tomorrow", jp: "私は明日サッカーをします" },
-      { en: "She will visit her grandmother next week", jp: "彼女は来週おばあさんを訪れます" },
-      { en: "They will have lunch at noon", jp: "彼らは正午に昼ごはんを食べます" },
-      { en: "We will watch a movie tonight", jp: "私たちは今晩映画を見ます" },
-      { en: "He will study English tomorrow", jp: "彼は明日英語を勉強します" }
-    ],
-    if: [
-      { en: "If it rains, I will stay home", jp: "もし雨が降ったら、家にいます" },
-      { en: "If I study, I will pass the test", jp: "もし勉強すれば、テストに合格します" },
-      { en: "If she calls, tell me", jp: "もし彼女が電話したら、教えてください" },
-      { en: "If we hurry, we won't be late", jp: "もし急げば、遅れません" },
-      { en: "If you eat too much, you get sick", jp: "もし食べ過ぎると、病気になります" }
-    ],
-    when: [
-      { en: "I wash my hands when I get home", jp: "家に帰るとき、手を洗います" },
-      { en: "When it is sunny, we play outside", jp: "晴れのとき、外で遊びます" },
-      { en: "He reads a book when he waits", jp: "待っているとき、本を読みます" },
-      { en: "When school starts, I get nervous", jp: "学校が始まるとき、緊張します" },
-      { en: "When I eat, I watch TV", jp: "食べるとき、テレビを見ます" }
-    ],
-    think: [
-      { en: "I think it will rain tomorrow", jp: "明日は雨が降ると思います" },
-      { en: "She thinks the test is hard", jp: "彼女はテストが難しいと思います" },
-      { en: "They think this movie is fun", jp: "彼らはこの映画は楽しいと思います" },
-      { en: "I think we should study more", jp: "もっと勉強するべきだと思います" },
-      { en: "He thinks Japanese is interesting", jp: "彼は日本語は面白いと思います" }
-    ],
-    want: [
-      { en: "I want to go to Japan", jp: "日本に行きたいです" },
-      { en: "She wants to eat sushi", jp: "彼女は寿司を食べたいです" },
-      { en: "They want to watch anime", jp: "彼らはアニメを見たいです" },
-      { en: "I want to read a book", jp: "本を読みたいです" },
-      { en: "He wants to play tennis", jp: "彼はテニスをしたいです" }
-    ],
-    purpose: [
-      { en: "I use plastic to save the environment", jp: "環境を守るためにプラスチックを使います" },
-      { en: "She studies Japanese to speak well", jp: "彼女は上手に話すために日本語を勉強します" },
-      { en: "We recycle to help the planet", jp: "地球を助けるためにリサイクルします" },
-      { en: "He exercises to stay healthy", jp: "健康を保つために運動します" },
-      { en: "They plant trees to clean the air", jp: "空気をきれいにするために木を植えます" }
-    ],
-    must: [
-      { en: "You must finish your homework", jp: "宿題を終わらせなければなりません" },
-      { en: "We must wear masks", jp: "マスクをしなければなりません" },
-      { en: "He must not be late", jp: "彼は遅れてはいけません" },
-      { en: "You must listen carefully", jp: "注意深く聞かなければなりません" },
-      { en: "She must study every day", jp: "彼女は毎日勉強しなければなりません" }
-    ],
-    mustNot: [
-      { en: "You must not smoke here", jp: "ここでたばこを吸ってはいけません" },
-      { en: "They must not enter", jp: "彼らは入ってはいけません" },
-      { en: "He must not speak loudly", jp: "彼は大声で話してはいけません" },
-      { en: "You must not use your phone", jp: "携帯電話を使ってはいけません" },
-      { en: "She must not eat sweets", jp: "彼女はお菓子を食べてはいけません" }
-    ]
-  };
+  <div id="custom-sentence-area">
+    <h3>Add Custom Sentence</h3>
+    <label for="custom-grammar">Choose Grammar Set:</label>
+    <select id="custom-grammar"></select>
+    <label for="custom-sentence">English Sentence:</label>
+    <input id="custom-sentence" type="text" placeholder="Type your English sentence" />
+    <label for="custom-translation">Japanese Translation:</label>
+    <input id="custom-translation" type="text" placeholder="Type the Japanese translation" />
+    <button id="add-sentence-btn">Add Sentence</button>
+    <p id="add-sentence-msg" style="color:green;"></p>
+  </div>
 
-  // GAME STATE
-  let currentSet = [];
-  let sentence = "";
-  let words = [];
-  let shuffledWords = [];
-  let score = 0;
-  let streak = 0;
-  let streakAnimationTimeout;
-  let userName = "";
-  const streakMilestones = [3,5,10];
+  <script>
+    // Your original grammar sets with 5 sentences each:
+    const baseGrammarSets = {
+      "未来形": [
+        { sentence: "I will play soccer tomorrow.", translation: "私は明日サッカーをします。" },
+        { sentence: "She will visit her grandma.", translation: "彼女はおばあちゃんを訪ねます。" },
+        { sentence: "They will eat dinner at 7.", translation: "彼らは7時に夕食を食べます。" },
+        { sentence: "We will go to the park.", translation: "私たちは公園に行きます。" },
+        { sentence: "He will study for the test.", translation: "彼はテストのために勉強します。" }
+      ],
+      "もし…": [
+        { sentence: "If it rains, I will stay home.", translation: "もし雨が降ったら、家にいます。" },
+        { sentence: "If you study, you will pass.", translation: "もし勉強すれば、合格します。" },
+        { sentence: "If he calls, tell me.", translation: "もし彼が電話したら、教えて。" },
+        { sentence: "If I have time, I will help.", translation: "もし時間があれば、手伝います。" },
+        { sentence: "If she comes, we will start.", translation: "もし彼女が来たら、始めます。" }
+      ],
+      "するとき": [
+        { sentence: "I listen to music when I study.", translation: "勉強するとき、音楽を聴きます。" },
+        { sentence: "When it rains, I use an umbrella.", translation: "雨が降るとき、傘を使います。" },
+        { sentence: "He eats breakfast when he wakes up.", translation: "起きるとき、彼は朝ごはんを食べます。" },
+        { sentence: "When I go to school, I take the bus.", translation: "学校に行くとき、バスに乗ります。" },
+        { sentence: "She calls me when she arrives.", translation: "着くとき、彼女は電話します。" }
+      ],
+      "…思う": [
+        { sentence: "I think it will rain today.", translation: "今日は雨が降ると思います。" },
+        { sentence: "She thinks the movie is fun.", translation: "彼女は映画が楽しいと思います。" },
+        { sentence: "They think the test is easy.", translation: "彼らはテストが簡単だと思います。" },
+        { sentence: "I think he is kind.", translation: "彼は優しいと思います。" },
+        { sentence: "We think the food is delicious.", translation: "食べ物がおいしいと思います。" }
+      ],
+      "すること１": [
+        { sentence: "I want to go to Japan.", translation: "日本に行きたいです。" },
+        { sentence: "She wants to learn English.", translation: "彼女は英語を学びたいです。" },
+        { sentence: "They want to watch a movie.", translation: "彼らは映画を見たいです。" },
+        { sentence: "We want to play outside.", translation: "外で遊びたいです。" },
+        { sentence: "He wants to read a book.", translation: "彼は本を読みたいです。" }
+      ],
+      "すること２": [
+        { sentence: "I use plastic to save the environment.", translation: "環境を守るためにプラスチックを使います。" },
+        { sentence: "She uses a bicycle every day.", translation: "彼女は毎日自転車を使います。" },
+        { sentence: "They use computers for school.", translation: "彼らは学校でコンピューターを使います。" },
+        { sentence: "We use energy carefully.", translation: "私たちはエネルギーを大切に使います。" },
+        { sentence: "He uses a map to find the place.", translation: "彼は場所を探すために地図を使います。" }
+      ],
+      "しなければならない": [
+        { sentence: "I must finish my homework.", translation: "宿題を終わらせなければなりません。" },
+        { sentence: "She must clean her room.", translation: "彼女は部屋を掃除しなければなりません。" },
+        { sentence: "They must arrive on time.", translation: "彼らは時間通りに着かなければなりません。" },
+        { sentence: "We must study for the test.", translation: "テストのために勉強しなければなりません。" },
+        { sentence: "He must wear a uniform.", translation: "彼は制服を着なければなりません。" }
+      ],
+      "してはいけない": [
+        { sentence: "You must not run in the hall.", translation: "廊下で走ってはいけません。" },
+        { sentence: "She must not eat during class.", translation: "授業中に食べてはいけません。" },
+        { sentence: "They must not use phones here.", translation: "ここで携帯電話を使ってはいけません。" },
+        { sentence: "We must not litter.", translation: "ゴミを捨ててはいけません。" },
+        { sentence: "He must not be late.", translation: "彼は遅れてはいけません。" }
+      ]
+    };
 
-  // DOM ELEMENTS
-  const startScreen = document.getElementById('start-screen');
-  const gameScreen = document.getElementById('game-screen');
-  const gameTitle = document.getElementById('game-title');
-  const translationEl = document.getElementById('translation');
-  const dropZone = document.getElementById('drop-zone');
-  const wordBank = document.getElementById('word-bank');
-  const tick = document.getElementById('tick');
-  const scoreEl = document.getElementById('score');
-  const missionTracker = document.getElementById('mission-tracker');
-  const nextBtn = document.getElementById('nextBtn');
-  const hintBtn = document.getElementById('hintBtn');
-  const nicknameInput = document.getElementById('nickname');
-  const leaderboardList = document.getElementById('leaderboard-list');
-  const clearProgressBtn = document.getElementById('clearProgressBtn');
-  const progressBar = document.getElementById('progress-bar');
-  const themeToggle = document.getElementById('themeToggle');
-  const confettiContainer = document.getElementById('confetti-container');
+    // We'll load sentences from localStorage or start from baseGrammarSets
+    let grammarSets = JSON.parse(localStorage.getItem("customGrammarSets")) || baseGrammarSets;
 
-  // Save/load from localStorage keys
-  function storageKey(name) {
-    return `unjumble-progress-${name}`;
-  }
-  function storageLeaderboardKey() {
-    return 'unjumble-leaderboard';
-  }
+    let currentSetName = null;
+    let currentSet = [];
+    let sentence = "";
+    let words = [];
+    let score = 0;
 
-  // THEME TOGGLE
-  themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    themeToggle.textContent = document.body.classList.contains('dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
-  });
+    const grammarSelect = document.getElementById("grammar-select");
+    const dropZone = document.getElementById("drop-zone");
+    const wordBank = document.getElementById("word-bank");
+    const scoreDisplay = document.getElementById("score");
+    const tick = document.getElementById("tick");
+    const translationBox = document.getElementById("translation");
+    const nextBtn = document.getElementById("next");
+    const hintBtn = document.getElementById("hint");
+    const replayBtn = document.getElementById("replay");
+    const nicknameInput = document.getElementById("nickname");
+    const leaderboardList = document.getElementById("leaderboard-list");
+    const customGrammarSelect = document.getElementById("custom-grammar");
+    const customSentenceInput = document.getElementById("custom-sentence");
+    const customTranslationInput = document.getElementById("custom-translation");
+    const addSentenceBtn = document.getElementById("add-sentence-btn");
+    const addSentenceMsg = document.getElementById("add-sentence-msg");
+    const themeToggle = document.getElementById("theme-toggle");
+    const missionTracker = document.getElementById("mission-tracker");
 
-  // LOAD LEADERBOARD
-  function loadLeaderboard() {
-    let data = JSON.parse(localStorage.getItem(storageLeaderboardKey())) || {};
-    // Sort descending by stars
-    let entries = Object.entries(data);
-    entries.sort((a,b) => b[1].stars - a[1].stars);
-    leaderboardList.innerHTML = "";
-    entries.slice(0,10).forEach(([name, {stars}]) => {
-      let li = document.createElement('li');
-      li.textContent = `${name}: ${stars} ⭐`;
-      leaderboardList.appendChild(li);
-    });
-  }
+    // Load nickname
+    nicknameInput.value = localStorage.getItem("nickname") || "";
 
-  // SAVE TO LEADERBOARD
-  function saveToLeaderboard(name, stars, streak) {
-    if (!name) return;
-    let data = JSON.parse(localStorage.getItem(storageLeaderboardKey())) || {};
-    if (!data[name] || data[name].stars < stars) {
-      data[name] = { stars, streak };
-      localStorage.setItem(storageLeaderboardKey(), JSON.stringify(data));
-    }
-    loadLeaderboard();
-  }
-
-  // CLEAR PROGRESS
-  clearProgressBtn.addEventListener('click', () => {
-    if (!userName) {
-      alert("Please enter your nickname first.");
-      return;
-    }
-    if (confirm(`Clear progress for ${userName}? This cannot be undone.`)) {
-      localStorage.removeItem(storageKey(userName));
-      // Also reset leaderboard entry for this user
-      let data = JSON.parse(localStorage.getItem(storageLeaderboardKey())) || {};
-      delete data[userName];
-      localStorage.setItem(storageLeaderboardKey(), JSON.stringify(data));
-      score = 0; streak = 0;
-      updateScoreDisplay();
-      loadLeaderboard();
-      alert("Progress cleared.");
-    }
-  });
-
-  // START GAME
-  function startGame(setName) {
-    userName = nicknameInput.value.trim();
-    if (!userName) {
-      alert("Please enter a nickname before starting.");
-      return;
-    }
-    // Save progress for user if exists
-    const saved = JSON.parse(localStorage.getItem(storageKey(userName)));
-    if (saved && saved.setName === setName) {
-      score = saved.score || 0;
-      streak = saved.streak || 0;
-      updateScoreDisplay();
-      missionTracker.textContent = `Current streak: ${streak}`;
+    // Dark mode state
+    let isDark = localStorage.getItem("darkMode") === "true";
+    if (isDark) {
+      document.body.classList.add("dark");
+      themeToggle.textContent = "Light Mode";
     } else {
-      score = 0;
-      streak = 0;
-      updateScoreDisplay();
-      missionTracker.textContent = "";
+      themeToggle.textContent = "Dark Mode";
     }
 
-    currentSet = sentenceSets[setName];
-    sentence = "";
-    words = [];
-    shuffledWords = [];
-    gameTitle.textContent = {
-      future: "未来形 ",
-      if: "もし… ",
-      when: "〜するとき ",
-      think: "…と思う ",
-      want: "すること１ ",
-      purpose: "すること２ ",
-      must: "しなければならない ",
-      mustNot: "してはいけない "
-    }[setName] || setName;
-
-    startScreen.classList.remove('active');
-    gameScreen.classList.add('active');
-    nextSentence();
-  }
-
-  // UPDATE SCORE DISPLAY (stars bar)
-  function updateScoreDisplay() {
-    scoreEl.innerHTML = "";
-    for(let i=0; i < score; i++) {
-      const star = document.createElement("span");
-      star.classList.add("star");
-      star.textContent = "⭐";
-      scoreEl.appendChild(star);
-    }
-  }
-
-  // NEXT SENTENCE
-  function nextSentence() {
-    // Hide next button initially & tick
-    nextBtn.style.opacity = 0;
-    tick.classList.remove('show');
-    missionTracker.textContent = `Current streak: ${streak}`;
-
-    // Pick random sentence from currentSet
-    const entry = currentSet[Math.floor(Math.random() * currentSet.length)];
-    sentence = entry.en;
-    words = sentence.split(" ");
-    shuffledWords = shuffleArray([...words]);
-
-    // Clear UI
-    dropZone.innerHTML = "";
-    wordBank.innerHTML = "";
-    translationEl.textContent = entry.jp;
-
-    // Create slots in drop zone (snap targets)
-    for (let i=0; i<words.length; i++) {
-      const slot = document.createElement('div');
-      slot.classList.add('word-slot');
-      slot.dataset.index = i;
-      dropZone.appendChild(slot);
+    function saveProgress() {
+      const progress = {
+        currentSetName,
+        score,
+        nickname: nicknameInput.value,
+        grammarSets,
+      };
+      localStorage.setItem("unjumbleProgress", JSON.stringify(progress));
+      localStorage.setItem("nickname", nicknameInput.value);
+      localStorage.setItem("customGrammarSets", JSON.stringify(grammarSets));
     }
 
-    // Create draggable words
-    shuffledWords.forEach(word => {
-      const el = document.createElement("div");
-      el.textContent = word;
-      el.classList.add("word");
-      el.draggable = true;
-      el.addEventListener("dragstart", dragStart);
-      wordBank.appendChild(el);
-    });
-
-    updateProgressBar();
-  }
-
-  // DRAG & DROP HANDLERS
-  let draggedWord = null;
-  function dragStart(e) {
-    draggedWord = e.target;
-    e.dataTransfer.setData("text/plain", e.target.textContent);
-    // Needed for Firefox
-    e.dataTransfer.effectAllowed = "move";
-  }
-  function allowDrop(e) {
-    e.preventDefault();
-  }
-  function drop(e) {
-    e.preventDefault();
-    if (!draggedWord) return;
-    if (e.target.classList.contains("word-slot")) {
-      // If slot already has a word, return it to wordBank first
-      if (e.target.firstChild) {
-        wordBank.appendChild(e.target.firstChild);
+    function loadProgress() {
+      const progressStr = localStorage.getItem("unjumbleProgress");
+      if (!progressStr) return false;
+      try {
+        const progress = JSON.parse(progressStr);
+        if (progress.currentSetName && grammarSets[progress.currentSetName]) {
+          currentSetName = progress.currentSetName;
+          currentSet = grammarSets[currentSetName];
+          score = progress.score || 0;
+          nicknameInput.value = progress.nickname || "";
+          updateScore();
+          updateMission();
+          loadLeaderboard();
+          showGrammarButtons(false);
+          loadSentence();
+          return true;
+        }
+      } catch (e) {
+        console.warn("Failed to load progress", e);
       }
-      e.target.appendChild(draggedWord);
-      checkAnswer();
+      return false;
     }
-  }
 
-  dropZone.addEventListener("dragover", allowDrop);
-  dropZone.addEventListener("drop", drop);
-
-  // CHECK ANSWER
-  function checkAnswer() {
-    const arrangedWords = [];
-    // Gather words in slots by index order
-    const slots = [...dropZone.children];
-    for(let slot of slots) {
-      arrangedWords.push(slot.firstChild ? slot.firstChild.textContent : "");
-    }
-    // Color code correct/wrong words
-    slots.forEach((slot, i) => {
-      if (!slot.firstChild) {
-        slot.style.borderColor = "#ccc";
+    // Build grammar buttons vertically in center
+    function showGrammarButtons(show = true) {
+      grammarSelect.innerHTML = "";
+      if (!show) {
+        grammarSelect.style.display = "none";
         return;
       }
-      if (slot.firstChild.textContent === words[i]) {
-        slot.style.borderColor = "#28a745"; // green
-      } else {
-        slot.style.borderColor = "#dc3545"; // red
+      grammarSelect.style.display = "block";
+      for (const key of Object.keys(grammarSets)) {
+        const btn = document.createElement("button");
+        btn.className = "grammar-button";
+        btn.textContent = key;
+        btn.onclick = () => {
+          currentSetName = key;
+          currentSet = grammarSets[key];
+          score = 0;
+          updateScore();
+          updateMission();
+          showGrammarButtons(false);
+          saveProgress();
+          loadSentence();
+        };
+        grammarSelect.appendChild(btn);
       }
-    });
+    }
 
-    // Check full sentence
-    if (arrangedWords.join(" ") === sentence) {
-      tick.classList.add('show');
-      nextBtn.style.opacity = 1;
-      addStar();
-      streak++;
-      missionTracker.textContent = `Current streak: ${streak}`;
-      saveProgress();
-      showStreakBonusIfNeeded();
-      playConfetti();
-      speakSentence();
-    } else {
-      tick.classList.remove('show');
-      nextBtn.style.opacity = 0;
-      streak = 0;
-      missionTracker.textContent = `Current streak: ${streak}`;
+    // Load a sentence and set up the word bank and drop zone
+    let currentSentenceIndex = 0;
+
+    function loadSentence() {
+      if (!currentSet || currentSet.length === 0) {
+        alert("No sentences in this grammar set.");
+        return;
+      }
+      if (currentSentenceIndex >= currentSet.length) {
+        alert("You have finished all sentences in this set!");
+        currentSentenceIndex = 0;
+      }
+      const data = currentSet[currentSentenceIndex];
+      sentence = data.sentence;
+      translationBox.textContent = data.translation;
+      // Split words by space but keep punctuation attached (simple split)
+      words = sentence.split(" ").map((w) => w.trim()).filter(Boolean);
+      shuffle(words);
+
+      dropZone.innerHTML = "";
+      wordBank.innerHTML = "";
+
+      // Create drop slots equal to sentence words
+      for (let i = 0; i < words.length; i++) {
+        const slot = document.createElement("div");
+        slot.className = "word-slot";
+        slot.dataset.index = i;
+        slot.ondragover = allowDrop;
+        slot.ondrop = drop;
+        dropZone.appendChild(slot);
+      }
+
+      // Create draggable words
+      words.forEach((word) => {
+        const w = document.createElement("div");
+        w.className = "word";
+        w.textContent = word;
+        w.draggable = true;
+        w.ondragstart = drag;
+        wordBank.appendChild(w);
+      });
+
+      nextBtn.style.display = "none";
+      tick.style.display = "none";
+      hintUsed = false;
       saveProgress();
     }
-  }
 
-  // SHOW HINT - first word snap
-  function showHint() {
-    // Check if first slot empty, fill with first word from original sentence if present in wordBank
-    const firstSlot = dropZone.children[0];
-    if (firstSlot && !firstSlot.firstChild) {
-      const hintWord = words[0];
-      const candidate = [...wordBank.children].find(el => el.textContent === hintWord);
-      if (candidate) {
-        firstSlot.appendChild(candidate);
+    // Shuffle helper
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    // Drag and drop handlers
+    let draggedWord = null;
+
+    function drag(ev) {
+      draggedWord = ev.target;
+      ev.dataTransfer.setData("text/plain", ev.target.textContent);
+      ev.dataTransfer.effectAllowed = "move";
+    }
+
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      if (!draggedWord) return;
+      const slot = ev.target;
+      if (!slot.classList.contains("word-slot")) return;
+
+      // Remove any word currently in slot
+      if (slot.firstChild) {
+        // Move the existing word back to wordBank
+        wordBank.appendChild(slot.firstChild);
+      }
+      slot.appendChild(draggedWord);
+
+      checkAnswer();
+    }
+
+    // Check answer correctness
+    function checkAnswer() {
+      const slots = [...dropZone.children];
+      let correctCount = 0;
+      let allFilled = true;
+
+      slots.forEach((slot, i) => {
+        const wordElem = slot.firstChild;
+        if (!wordElem) {
+          allFilled = false;
+          return;
+        }
+        const expectedWord = words[i];
+        if (wordElem.textContent === expectedWord) {
+          wordElem.classList.remove("wrong");
+          wordElem.classList.add("correct");
+          correctCount++;
+        } else {
+          wordElem.classList.remove("correct");
+          wordElem.classList.add("wrong");
+        }
+      });
+
+      if (allFilled && correctCount === words.length) {
+        onCorrectAnswer();
+      }
+    }
+
+    function onCorrectAnswer() {
+      tick.style.display = "block";
+      score++;
+      updateScore();
+      updateMission();
+      nextBtn.style.display = "inline-block";
+      playAudio(sentence);
+      saveLeaderboard();
+      saveProgress();
+    }
+
+    function updateScore() {
+      let stars = "⭐".repeat(score);
+      scoreDisplay.textContent = `Score: ${stars}`;
+    }
+
+    function updateMission() {
+      missionTracker.textContent = `Sentences completed: ${score}`;
+    }
+
+    // Hint system: reveal first word
+    let hintUsed = false;
+    hintBtn.onclick = () => {
+      if (hintUsed) return;
+      hintUsed = true;
+      // Find first slot
+      const firstSlot = dropZone.children[0];
+      if (!firstSlot) return;
+      // Move correct word to first slot from wordBank
+      const correctWord = words[0];
+      // Find the word in wordBank
+      let foundWord = null;
+      [...wordBank.children].forEach((w) => {
+        if (w.textContent === correctWord) {
+          foundWord = w;
+        }
+      });
+      if (foundWord) {
+        if (firstSlot.firstChild) {
+          wordBank.appendChild(firstSlot.firstChild);
+        }
+        firstSlot.appendChild(foundWord);
         checkAnswer();
       }
-    }
-  }
-
-  // REPLAY AUDIO
-  function speakSentence() {
-    if (!window.speechSynthesis) return;
-    const utterance = new SpeechSynthesisUtterance(sentence);
-    const voices = speechSynthesis.getVoices();
-    const aussieVoice = voices.find(v => v.lang === "en-AU") || voices.find(v => v.lang.startsWith("en"));
-    if (aussieVoice) utterance.voice = aussieVoice;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
-  }
-  function replayAudio() {
-    const arrangedWords = Array.from(dropZone.children).map(slot => slot.firstChild?.textContent || "").join(" ");
-    if (arrangedWords === sentence) speakSentence();
-  }
-
-  // SAVE PROGRESS to localStorage by nickname
-  function saveProgress() {
-    if (!userName) return;
-    const data = {
-      setName: gameTitle.textContent,
-      score,
-      streak,
     };
-    localStorage.setItem(storageKey(userName), JSON.stringify(data));
-    saveToLeaderboard(userName, score, streak);
-  }
 
-  // ADD STAR (visual & score)
-  function addStar() {
-    score++;
-    updateScoreDisplay();
-    animateLatestStar();
-    updateProgressBar();
-  }
-  function updateProgressBar() {
-    const total = currentSet.length;
-    const percent = Math.min(100, (score / total) * 100);
-    progressBar.style.width = percent + "%";
-  }
+    // Replay audio
+    replayBtn.onclick = () => {
+      playAudio(sentence);
+    };
 
-  // Animate the latest star with pop & burst
-  function animateLatestStar() {
-    const stars = scoreEl.querySelectorAll(".star");
-    if (stars.length === 0) return;
-    const latestStar = stars[stars.length -1];
-    latestStar.classList.add("popburst");
-    setTimeout(() => {
-      latestStar.classList.remove("popburst");
-    }, 500);
-  }
+    // Next sentence
+    nextBtn.onclick = () => {
+      currentSentenceIndex++;
+      if (currentSentenceIndex >= currentSet.length) {
+        currentSentenceIndex = 0;
+        alert("You've completed all sentences in this set! Starting over.");
+      }
+      loadSentence();
+      nextBtn.style.display = "none";
+      tick.style.display = "none";
+    };
 
-  // Show streak bonus star sparkle if milestone hit
-  function showStreakBonusIfNeeded() {
-    if (streakMilestones.includes(streak)) {
-      const star = document.createElement("span");
-      star.textContent = "🌟";
-      star.style.position = "fixed";
-      star.style.top = "70px";
-      star.style.right = "20px";
-      star.style.fontSize = "3rem";
-      star.style.opacity = "1";
-      star.style.transition = "opacity 1.2s ease";
-      document.body.appendChild(star);
-      setTimeout(() => {
-        star.style.opacity = "0";
-        setTimeout(() => {
-          document.body.removeChild(star);
-        }, 1200);
-      }, 800);
-      // Bonus stars
-      for(let i=0; i<2; i++) addStar();
+    // Audio play function (Australian accent)
+    function playAudio(text) {
+      if (!window.speechSynthesis) return;
+      const utter = new SpeechSynthesisUtterance(text);
+      // Find an Australian English voice:
+      const voices = window.speechSynthesis.getVoices();
+      const ausVoice = voices.find(
+        (v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("australian")
+      );
+      if (ausVoice) utter.voice = ausVoice;
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
     }
-  }
 
-  // Confetti animation for celebration
-  function playConfetti() {
-    const confettiCount = 30;
-    for(let i=0; i < confettiCount; i++) {
-      const confetti = document.createElement("div");
-      confetti.classList.add("confetti");
-      confetti.style.left = Math.random() * window.innerWidth + "px";
-      confetti.style.top = "-10px";
-      confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 70%)`;
-      confetti.style.animationDuration = (2 + Math.random()*2) + "s";
-      confetti.style.transform = `rotate(${Math.random()*360}deg)`;
-      confettiContainer.appendChild(confetti);
-      setTimeout(() => {
-        confetti.remove();
-      }, 4000);
+    // Leaderboard: store top 10 scores by nickname
+    function loadLeaderboard() {
+      const stored = localStorage.getItem("unjumbleLeaderboard");
+      let leaderboard = stored ? JSON.parse(stored) : [];
+      leaderboardList.innerHTML = "";
+      leaderboard
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10)
+        .forEach(({ name, score }) => {
+          const li = document.createElement("li");
+          li.textContent = `${name}: ${"⭐".repeat(score)}`;
+          leaderboardList.appendChild(li);
+        });
     }
-  }
 
-  // SHUFFLE ARRAY
-  function shuffleArray(arr) {
-    let a = arr.slice();
-    for(let i = a.length -1; i > 0; i--) {
-      const j = Math.floor(Math.random()*(i+1));
-      [a[i], a[j]] = [a[j], a[i]];
+    function saveLeaderboard() {
+      const stored = localStorage.getItem("unjumbleLeaderboard");
+      let leaderboard = stored ? JSON.parse(stored) : [];
+      const name = nicknameInput.value.trim() || "Anonymous";
+      const existingIndex = leaderboard.findIndex((p) => p.name === name);
+      if (existingIndex >= 0) {
+        if (leaderboard[existingIndex].score < score) {
+          leaderboard[existingIndex].score = score;
+        }
+      } else {
+        leaderboard.push({ name, score });
+      }
+      localStorage.setItem("unjumbleLeaderboard", JSON.stringify(leaderboard));
+      loadLeaderboard();
     }
-    return a;
-  }
 
-  // EVENT LISTENERS FOR START SCREEN BUTTONS
-  document.querySelectorAll(".grammar-button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      startGame(btn.dataset.set);
-    });
-  });
-
-  // NICKNAME INPUT saves to variable
-  nicknameInput.addEventListener("change", () => {
-    userName = nicknameInput.value.trim();
-    loadUserProgress(userName);
-  });
-
-  // LOAD USER PROGRESS ON NICKNAME ENTER
-  function loadUserProgress(name) {
-    if (!name) return;
-    const saved = JSON.parse(localStorage.getItem(storageKey(name)));
-    if (saved) {
-      score = saved.score || 0;
-      streak = saved.streak || 0;
-      updateScoreDisplay();
-      missionTracker.textContent = `Current streak: ${streak}`;
-    } else {
-      score = 0;
-      streak = 0;
-      updateScoreDisplay();
-      missionTracker.textContent = "";
+    // Custom sentence upload interface
+    function populateCustomGrammarSelect() {
+      customGrammarSelect.innerHTML = "";
+      Object.keys(grammarSets).forEach((key) => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = key;
+        customGrammarSelect.appendChild(option);
+      });
     }
-  }
 
-  // CLEAR PROGRESS BUTTON handled above
+    addSentenceBtn.onclick = () => {
+      const selectedGrammar = customGrammarSelect.value;
+      const eng = customSentenceInput.value.trim();
+      const jp = customTranslationInput.value.trim();
+      if (!eng || !jp) {
+        addSentenceMsg.style.color = "red";
+        addSentenceMsg.textContent = "Please enter both English and Japanese sentences.";
+        return;
+      }
+      if (!grammarSets[selectedGrammar]) {
+        addSentenceMsg.style.color = "red";
+        addSentenceMsg.textContent = "Invalid grammar set selected.";
+        return;
+      }
+      grammarSets[selectedGrammar].push({ sentence: eng, translation: jp });
+      addSentenceMsg.style.color = "green";
+      addSentenceMsg.textContent = "Sentence added!";
+      customSentenceInput.value = "";
+      customTranslationInput.value = "";
+      saveProgress();
+      populateCustomGrammarSelect();
+    };
 
-  // INIT
-  loadLeaderboard();
+    // Theme toggle
+    themeToggle.onclick = () => {
+      isDark = !isDark;
+      if (isDark) {
+        document.body.classList.add("dark");
+        themeToggle.textContent = "Light Mode";
+      } else {
+        document.body.classList.remove("dark");
+        themeToggle.textContent = "Dark Mode";
+      }
+      localStorage.setItem("darkMode", isDark);
+    };
 
-  // Preload voices for speech synthesis
-  window.speechSynthesis.onvoiceschanged = () => {};
+    // Initialize app
+    function init() {
+      populateCustomGrammarSelect();
+      loadLeaderboard();
+      if (!loadProgress()) {
+        showGrammarButtons(true);
+      }
+      nicknameInput.oninput = () => {
+        localStorage.setItem("nickname", nicknameInput.value.trim());
+        saveLeaderboard();
+      };
+    }
 
-</script>
+    init();
+  </script>
 </body>
 </html>
