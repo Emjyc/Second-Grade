@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: 'Nico Moji', sans-serif;
-      background: #f0f8ff;
+      background: linear-gradient(to bottom, #ffe3e3, #f5f5dc);
       margin: 0;
       padding: 0;
       text-align: center;
@@ -21,8 +21,12 @@
       display: block;
     }
     h1 {
-      font-size: 2em;
+      font-size: 2.5em;
       margin: 1rem;
+      background: #ffd6ec;
+      padding: 10px;
+      border-radius: 20px;
+      display: inline-block;
     }
     .grammar-button {
       font-size: 1.2rem;
@@ -42,18 +46,26 @@
     }
     .word {
       font-size: 2rem;
-      padding: 10px;
+      padding: 10px 20px;
       cursor: grab;
-      border-radius: 10px;
+      border-radius: 15px;
+      background: #fff8dc;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
       user-select: none;
+      transition: transform 0.2s ease;
     }
-    .word.correct { color: green; }
-    .word.wrong { color: red; }
+    .word:active {
+      transform: scale(1.1);
+    }
+    .word.correct { background-color: #d4edda; color: green; }
+    .word.wrong { background-color: #f8d7da; color: red; }
     button {
       font-size: 1rem;
       margin: 10px;
       padding: 10px 20px;
       cursor: pointer;
+      border-radius: 10px;
+      background-color: #ffdac1;
     }
     #tick {
       font-size: 3rem;
@@ -69,6 +81,11 @@
       font-size: 1.5rem;
       color: #555;
       margin-bottom: 10px;
+    }
+    #mission-tracker {
+      margin: 10px;
+      font-size: 1rem;
+      color: #333;
     }
     @keyframes pop {
       0% { transform: scale(0); opacity: 0; }
@@ -101,6 +118,7 @@
     <button id="nextBtn" onclick="nextSentence()" style="display:none;">➡️ Next</button>
     <div id="tick">✔️</div>
     <div id="score"></div>
+    <div id="mission-tracker"></div>
   </div>
 
   <script>
@@ -110,19 +128,20 @@
         { en: "She will visit her grandmother next week", jp: "彼女は来週おばあさんを訪れます" },
         { en: "They will have lunch at noon", jp: "彼らは正午に昼ごはんを食べます" }
       ]
-      // Add translations for other sets similarly...
     };
 
     let currentSet = [];
     let sentence = "";
     let words = [];
     let score = 0;
+    let totalSentences = 0;
     const dropZone = document.getElementById("drop-zone");
     const wordBank = document.getElementById("word-bank");
     const tick = document.getElementById("tick");
     const gameTitle = document.getElementById("game-title");
     const scoreDisplay = document.getElementById("score");
     const translation = document.getElementById("translation");
+    const missionTracker = document.getElementById("mission-tracker");
 
     function startGame(setName) {
       document.getElementById("start-screen").classList.remove("active");
@@ -130,7 +149,9 @@
       gameTitle.textContent = setName;
       currentSet = sentenceSets[setName];
       score = 0;
+      totalSentences = 0;
       scoreDisplay.innerHTML = "🍓 0 points";
+      missionTracker.textContent = "Mission: 0 / " + currentSet.length + " sentences";
       nextSentence();
     }
 
@@ -144,6 +165,26 @@
       translation.textContent = entry.jp;
       tick.style.display = "none";
       document.getElementById("nextBtn").style.display = "none";
+
+      for (let i = 0; i < words.length; i++) {
+        const slot = document.createElement("div");
+        slot.classList.add("word-slot");
+        slot.style.minWidth = "100px";
+        slot.style.minHeight = "40px";
+        slot.style.margin = "5px";
+        slot.style.borderBottom = "2px dashed #ccc";
+        slot.ondragover = e => e.preventDefault();
+        slot.ondrop = function(e) {
+          e.preventDefault();
+          const data = e.dataTransfer.getData("text");
+          const draggedEl = [...wordBank.children].find(el => el.textContent === data);
+          if (draggedEl && slot.children.length === 0) {
+            slot.appendChild(draggedEl);
+            checkAnswer();
+          }
+        };
+        dropZone.appendChild(slot);
+      }
 
       shuffled.forEach(word => {
         const el = document.createElement("div");
@@ -159,31 +200,21 @@
       e.dataTransfer.setData("text", e.target.textContent);
     }
 
-    dropZone.addEventListener("dragover", e => e.preventDefault());
-    dropZone.addEventListener("drop", drop);
-
-    function drop(e) {
-      e.preventDefault();
-      const data = e.dataTransfer.getData("text");
-      const draggedEl = [...wordBank.children].find(el => el.textContent === data);
-      if (draggedEl) {
-        dropZone.appendChild(draggedEl);
-        checkAnswer();
-      }
-    }
-
     function checkAnswer() {
-      const current = [...dropZone.children].map(el => el.textContent).join(" ");
-      [...dropZone.children].forEach((el, idx) => {
-        el.classList.remove("correct", "wrong");
-        if (words[idx]) {
+      const current = [...dropZone.children].map(slot => slot.children[0]?.textContent || "").join(" ").trim();
+      [...dropZone.children].forEach((slot, idx) => {
+        const el = slot.children[0];
+        if (el) {
+          el.classList.remove("correct", "wrong");
           el.classList.add(el.textContent === words[idx] ? "correct" : "wrong");
         }
       });
       if (current === sentence) {
         tick.style.display = "block";
         score++;
+        totalSentences++;
         scoreDisplay.innerHTML = `🍓 ${score} points`;
+        missionTracker.textContent = `Mission: ${totalSentences} / ${currentSet.length} sentences`;
         document.getElementById("nextBtn").style.display = "inline-block";
         speakSentence();
       } else {
@@ -192,13 +223,12 @@
     }
 
     function showHint() {
-      if (dropZone.children.length === 0) {
-        const firstWord = words[0];
-        const hintEl = [...wordBank.children].find(el => el.textContent === firstWord);
-        if (hintEl) {
-          dropZone.appendChild(hintEl);
-          checkAnswer();
-        }
+      const firstWord = words[0];
+      const hintEl = [...wordBank.children].find(el => el.textContent === firstWord);
+      const firstSlot = [...dropZone.children][0];
+      if (hintEl && firstSlot && firstSlot.children.length === 0) {
+        firstSlot.appendChild(hintEl);
+        checkAnswer();
       }
     }
 
@@ -211,7 +241,7 @@
     }
 
     function replayAudio() {
-      const current = [...dropZone.children].map(el => el.textContent).join(" ");
+      const current = [...dropZone.children].map(slot => slot.children[0]?.textContent || "").join(" ").trim();
       if (current === sentence) {
         speakSentence();
       }
