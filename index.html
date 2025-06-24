@@ -9,143 +9,195 @@
   body {
     font-family: 'Nico Moji', sans-serif;
     background: linear-gradient(to bottom, #ffe3e3, #f5f5dc);
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    transition: background-color 0.3s, color 0.3s;
+    margin: 0; padding: 0;
     color: #333;
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
   }
   body.dark {
     background: linear-gradient(to bottom, #2c3e50, #34495e);
     color: #ddd;
   }
-  #start-screen, #game-screen {
-    display: none;
-    padding: 20px;
-  }
-  #start-screen.active, #game-screen.active {
-    display: block;
-  }
-  h1 {
-    font-size: 2.5em;
-    margin: 1rem;
-    background: #ffd6ec;
-    padding: 10px;
-    border-radius: 20px;
-    display: inline-block;
-    transition: background-color 0.3s, color 0.3s;
-  }
-  body.dark h1 {
-    background: #8e44ad;
-    color: #f0e5f9;
-  }
-  .grammar-button {
-    font-size: 1.2rem;
-    margin: 10px;
-    padding: 10px 20px;
+  #themeToggle {
+    position: fixed;
+    top: 10px; right: 10px; z-index: 1000;
     cursor: pointer;
+    border-radius: 10px;
     border: none;
-    border-radius: 10px;
-    background: #a2d2ff;
-    transition: background-color 0.3s;
-  }
-  body.dark .grammar-button {
-    background: #6c7ae0;
-  }
-  #word-bank, #drop-zone {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin: 20px;
-  }
-  .word {
-    font-size: 2rem;
-    padding: 10px 20px;
-    cursor: grab;
-    border-radius: 15px;
-    background: #fff8dc;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-    user-select: none;
-    transition: transform 0.3s ease, background-color 0.3s, color 0.3s;
-  }
-  body.dark .word {
-    background: #7f8c8d;
-    color: #eee;
-    box-shadow: none;
-  }
-  .word:active {
-    transform: scale(1.1);
-  }
-  .word.correct {
-    background-color: #d4edda;
-    color: green;
-  }
-  .word.wrong {
-    background-color: #f8d7da;
-    color: red;
-  }
-  button {
-    font-size: 1rem;
-    margin: 10px;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 10px;
     background-color: #ffdac1;
+    padding: 8px 12px;
+    font-size: 1rem;
     transition: background-color 0.3s;
   }
-  body.dark button {
+  body.dark #themeToggle {
     background-color: #bb8fce;
     color: #f7f1ff;
   }
-  #tick {
-    font-size: 3rem;
-    color: green;
-    display: none;
-    animation: pop 0.5s ease-in-out;
+  #start-screen {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    box-sizing: border-box;
   }
-  #score {
-    font-size: 2rem;
-    margin-top: 10px;
-    min-height: 2.5rem;
-    letter-spacing: 4px;
+  #start-left {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  #nickname-container {
+    display: flex;
+    flex-direction: column;
+  }
+  #nickname-container label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  #nickname {
+    padding: 8px 12px;
+    border-radius: 15px;
+    border: 2px solid #a2d2ff;
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  #nickname:focus {
+    border-color: #6c7ae0;
+  }
+  #leaderboard {
+    background: #fef9f1;
+    border-radius: 15px;
+    padding: 10px 15px;
+    max-height: 280px;
+    overflow-y: auto;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+  }
+  body.dark #leaderboard {
+    background: #6e5494;
+    color: #eee;
+    box-shadow: none;
+  }
+  #leaderboard h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+  #leaderboard ol {
+    padding-left: 20px;
+    margin: 0;
+  }
+  #leaderboard li {
+    margin: 4px 0;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+
+  #start-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #start-right h1 {
+    font-size: 3rem;
+    margin-bottom: 25px;
+    background: #ffd6ec;
+    padding: 10px 20px;
+    border-radius: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(255, 150, 200, 0.6);
+    user-select: none;
+  }
+  body.dark #start-right h1 {
+    background: #8e44ad;
+    color: #f0e5f9;
+    box-shadow: 0 4px 12px rgba(150, 100, 255, 0.8);
+  }
+  .grammar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .grammar-button {
+    font-size: 1.4rem;
+    padding: 14px 0;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    background: #a2d2ff;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 8px #82b1ff;
+    user-select: none;
+  }
+  .grammar-button:hover, .grammar-button:focus {
+    background: #6c7ae0;
+    color: #fff;
+    transform: translateY(-4px);
+    outline: none;
+  }
+  body.dark .grammar-button {
+    background: #6c7ae0;
+    box-shadow: 0 4px 8px #4a4fbc;
+    color: #f0e5f9;
+  }
+  body.dark .grammar-button:hover {
+    background: #a2d2ff;
+    color: #222;
+  }
+
+  /* GAME SCREEN */
+
+  #game-screen {
+    display: none;
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  #game-screen.active {
+    display: flex;
+  }
+  #game-title {
+    font-size: 2.7rem;
+    margin-bottom: 10px;
+    background: #ffd6ec;
+    padding: 10px 25px;
+    border-radius: 30px;
+    user-select: none;
+    box-shadow: 0 4px 10px rgba(255,150,200,0.7);
+  }
+  body.dark #game-title {
+    background: #8e44ad;
+    color: #f0e5f9;
+    box-shadow: 0 4px 12px rgba(150,100,255,0.8);
   }
   #translation {
     font-size: 1.5rem;
     color: #555;
-    margin-bottom: 10px;
-    transition: color 0.3s;
+    margin-bottom: 15px;
+    user-select: none;
   }
   body.dark #translation {
     color: #ccc;
   }
-  #mission-tracker {
-    margin: 10px;
-    font-size: 1rem;
-    color: #333;
-    transition: color 0.3s;
-  }
-  body.dark #mission-tracker {
-    color: #ddd;
-  }
-  .word-slot {
-    min-width: 100px;
-    min-height: 40px;
-    margin: 5px;
-    border-bottom: 2px dashed #ccc;
-    border-radius: 10px;
-    transition: border-color 0.3s;
-  }
-  body.dark .word-slot {
-    border-color: #999;
-  }
   #progress-container {
     width: 80%;
-    max-width: 400px;
+    max-width: 500px;
     height: 20px;
     background: #ddd;
     border-radius: 15px;
-    margin: 0 auto 20px;
+    margin-bottom: 25px;
     overflow: hidden;
   }
   body.dark #progress-container {
@@ -160,160 +212,493 @@
   body.dark #progress-bar {
     background: #6c7ae0;
   }
-  @keyframes pop {
+
+  #drop-zone {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    min-height: 60px;
+  }
+  .word-slot {
+    flex: 1 1 0;
+    min-width: 80px;
+    border-bottom: 3px dashed #ccc;
+    border-radius: 15px;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    user-select: none;
+    transition: border-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  body.dark .word-slot {
+    border-color: #999;
+  }
+
+  #word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  .word {
+    background: #fff8dc;
+    padding: 10px 18px;
+    border-radius: 18px;
+    font-size: 2rem;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  body.dark .word {
+    background: #7f8c8d;
+    color: #eee;
+    box-shadow: none;
+  }
+  .word.correct {
+    background-color: #d4edda;
+    color: green;
+  }
+  .word.wrong {
+    background-color: #f8d7da;
+    color: red;
+  }
+  .word:active {
+    transform: scale(1.1);
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 10px 20px;
+    margin: 5px 10px;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    background-color: #ffdac1;
+    box-shadow: 0 4px 8px #ffb681;
+    transition: background-color 0.3s, transform 0.2s;
+    user-select: none;
+  }
+  button:hover, button:focus {
+    background-color: #ffb681;
+    transform: translateY(-4px);
+    outline: none;
+  }
+  body.dark button {
+    background-color: #bb8fce;
+    color: #f7f1ff;
+    box-shadow: 0 4px 8px #9d7acc;
+  }
+  body.dark button:hover {
+    background-color: #a07ed1;
+    color: #fff;
+  }
+
+  #hintBtn {
+    animation: glowPulse 2s infinite;
+  }
+
+  #tick {
+    font-size: 3rem;
+    color: green;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    user-select: none;
+  }
+  #tick.show {
+    opacity: 1;
+  }
+
+  #score {
+    font-size: 2.3rem;
+    letter-spacing: 6px;
+    margin-bottom: 20px;
+    min-height: 2.8rem;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+  .star {
+    position: relative;
+    display: inline-block;
+    font-size: 1.8rem;
+    cursor: default;
+  }
+  .star.popburst {
+    animation: popBurstScale 0.5s ease forwards;
+  }
+  .star.popburst::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.6em;
+    height: 1.6em;
+    background: radial-gradient(circle, #ffd700 40%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: burst 0.5s ease forwards;
+    z-index: -1;
+  }
+
+  #mission-tracker {
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+    user-select: none;
+  }
+
+  /* Pop & Color Burst Animation for stars */
+  @keyframes popBurstScale {
     0% {
       transform: scale(0);
       opacity: 0;
     }
-    100% {
-      transform: scale(1);
+    60% {
+      transform: scale(1.4);
       opacity: 1;
     }
+    100% {
+      transform: scale(1);
+    }
   }
+  @keyframes burst {
+    0% {
+      opacity: 0.6;
+      transform: scale(0);
+    }
+    70% {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+  }
+
+  /* Glow pulse for hint button */
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 6px 2px #ffdd55; }
+    50% { box-shadow: 0 0 14px 6px #fff066; }
+  }
+
+  /* Confetti container */
+  #confetti-container {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    overflow: visible;
+    z-index: 1000;
+  }
+  .confetti {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #ffda44;
+    opacity: 0.9;
+    border-radius: 2px;
+    animation-name: confetti-fall;
+    animation-timing-function: linear;
+  }
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
 </style>
 </head>
 <body>
-  <button id="themeToggle" style="position:fixed; top:10px; right:10px; z-index:1000;">🌙 Dark Mode</button>
+<button id="themeToggle">🌙 Dark Mode</button>
 
-  <div id="start-screen" class="active">
+<div id="start-screen" class="active">
+  <div id="start-left">
+    <div id="nickname-container">
+      <label for="nickname">Your Nickname</label>
+      <input type="text" id="nickname" maxlength="15" placeholder="Enter nickname" autocomplete="off" />
+      <button id="clearProgressBtn" style="margin-top:10px;">Clear Progress</button>
+    </div>
+
+    <div id="leaderboard">
+      <h3>Leaderboard - Top 10 ⭐</h3>
+      <ol id="leaderboard-list"></ol>
+    </div>
+  </div>
+
+  <div id="start-right">
     <h1>文法を選ぼう</h1>
-    <div>
-      <button class="grammar-button" onclick="startGame('future')">未来形</button>
-      <button class="grammar-button" onclick="startGame('if')">もし…</button>
-      <button class="grammar-button" onclick="startGame('when')">〜するとき</button>
-      <button class="grammar-button" onclick="startGame('think')">…と思う</button>
-      <button class="grammar-button" onclick="startGame('want')">すること１</button>
-      <button class="grammar-button" onclick="startGame('purpose')">すること２</button>
-      <button class="grammar-button" onclick="startGame('must')">しなければならない</button>
-      <button class="grammar-button" onclick="startGame('mustNot')">してはいけない</button>
+    <div class="grammar-list">
+      <button class="grammar-button" data-set="future">未来形 🚀</button>
+      <button class="grammar-button" data-set="if">もし… ☁️</button>
+      <button class="grammar-button" data-set="when">〜するとき ⏰</button>
+      <button class="grammar-button" data-set="think">…と思う 💭</button>
+      <button class="grammar-button" data-set="want">すること１ 💖</button>
+      <button class="grammar-button" data-set="purpose">すること２ 🌱</button>
+      <button class="grammar-button" data-set="must">しなければならない 🔒</button>
+      <button class="grammar-button" data-set="mustNot">してはいけない 🚫</button>
     </div>
   </div>
+</div>
 
-  <div id="game-screen">
-    <h1 id="game-title"></h1>
-    <div id="translation"></div>
+<div id="game-screen">
+  <h1 id="game-title"></h1>
+  <div id="translation"></div>
 
-    <div id="progress-container">
-      <div id="progress-bar"></div>
-    </div>
-
-    <div id="drop-zone"></div>
-    <div id="word-bank"></div>
-    <button onclick="showHint()">💡 Hint</button>
-    <button onclick="replayAudio()">🔊 Replay</button>
-    <button id="nextBtn" onclick="nextSentence()" style="display:none;">➡️ Next</button>
-    <div id="tick">✔️</div>
-    <div id="score"></div>
-    <div id="mission-tracker"></div>
+  <div id="progress-container">
+    <div id="progress-bar"></div>
   </div>
+
+  <div id="drop-zone"></div>
+  <div id="word-bank"></div>
+  <button id="hintBtn" onclick="showHint()">💡 Hint</button>
+  <button onclick="replayAudio()">🔊 Replay</button>
+  <button id="nextBtn" onclick="nextSentence()" style="opacity:0; transition: opacity 0.4s;">➡️ Next</button>
+  <div id="tick">✔️</div>
+  <div id="score"></div>
+  <div id="mission-tracker"></div>
+</div>
+
+<div id="confetti-container"></div>
 
 <script>
+  // SENTENCE SETS with 5 sentences each
   const sentenceSets = {
     future: [
       { en: "I will play soccer tomorrow", jp: "私は明日サッカーをします" },
       { en: "She will visit her grandmother next week", jp: "彼女は来週おばあさんを訪れます" },
-      { en: "They will have lunch at noon", jp: "彼らは正午に昼ごはんを食べます" }
+      { en: "They will have lunch at noon", jp: "彼らは正午に昼ごはんを食べます" },
+      { en: "We will watch a movie tonight", jp: "私たちは今晩映画を見ます" },
+      { en: "He will study English tomorrow", jp: "彼は明日英語を勉強します" }
     ],
     if: [
       { en: "If it rains, I will stay home", jp: "もし雨が降ったら、家にいます" },
       { en: "If I study, I will pass the test", jp: "もし勉強すれば、テストに合格します" },
-      { en: "If she calls, tell me", jp: "もし彼女が電話したら、教えてください" }
+      { en: "If she calls, tell me", jp: "もし彼女が電話したら、教えてください" },
+      { en: "If we hurry, we won't be late", jp: "もし急げば、遅れません" },
+      { en: "If you eat too much, you get sick", jp: "もし食べ過ぎると、病気になります" }
     ],
     when: [
       { en: "I wash my hands when I get home", jp: "家に帰るとき、手を洗います" },
       { en: "When it is sunny, we play outside", jp: "晴れのとき、外で遊びます" },
-      { en: "He reads a book when he waits", jp: "待っているとき、本を読みます" }
+      { en: "He reads a book when he waits", jp: "待っているとき、本を読みます" },
+      { en: "When school starts, I get nervous", jp: "学校が始まるとき、緊張します" },
+      { en: "When I eat, I watch TV", jp: "食べるとき、テレビを見ます" }
     ],
     think: [
       { en: "I think it will rain tomorrow", jp: "明日は雨が降ると思います" },
       { en: "She thinks the test is hard", jp: "彼女はテストが難しいと思います" },
-      { en: "They think this movie is fun", jp: "彼らはこの映画は楽しいと思います" }
+      { en: "They think this movie is fun", jp: "彼らはこの映画は楽しいと思います" },
+      { en: "I think we should study more", jp: "もっと勉強するべきだと思います" },
+      { en: "He thinks Japanese is interesting", jp: "彼は日本語は面白いと思います" }
     ],
     want: [
       { en: "I want to go to Japan", jp: "日本に行きたいです" },
-      { en: "He wants to eat sushi", jp: "彼は寿司を食べたいです" },
-      { en: "We want to watch a movie", jp: "私たちは映画を見たいです" }
+      { en: "She wants to eat sushi", jp: "彼女は寿司を食べたいです" },
+      { en: "They want to watch anime", jp: "彼らはアニメを見たいです" },
+      { en: "I want to read a book", jp: "本を読みたいです" },
+      { en: "He wants to play tennis", jp: "彼はテニスをしたいです" }
     ],
     purpose: [
       { en: "I use plastic to save the environment", jp: "環境を守るためにプラスチックを使います" },
-      { en: "She studies hard to pass the exam", jp: "彼女は試験に合格するために一生懸命勉強します" },
-      { en: "They recycle to protect the earth", jp: "彼らは地球を守るためにリサイクルします" }
+      { en: "She studies Japanese to speak well", jp: "彼女は上手に話すために日本語を勉強します" },
+      { en: "We recycle to help the planet", jp: "地球を助けるためにリサイクルします" },
+      { en: "He exercises to stay healthy", jp: "健康を保つために運動します" },
+      { en: "They plant trees to clean the air", jp: "空気をきれいにするために木を植えます" }
     ],
     must: [
-      { en: "I must finish my homework", jp: "宿題を終えなければなりません" },
-      { en: "You must wear a uniform", jp: "制服を着なければなりません" },
-      { en: "We must clean the classroom", jp: "教室を掃除しなければなりません" }
+      { en: "You must finish your homework", jp: "宿題を終わらせなければなりません" },
+      { en: "We must wear masks", jp: "マスクをしなければなりません" },
+      { en: "He must not be late", jp: "彼は遅れてはいけません" },
+      { en: "You must listen carefully", jp: "注意深く聞かなければなりません" },
+      { en: "She must study every day", jp: "彼女は毎日勉強しなければなりません" }
     ],
     mustNot: [
-      { en: "You must not talk in class", jp: "授業中に話してはいけません" },
-      { en: "He must not use his phone", jp: "彼は電話を使ってはいけません" },
-      { en: "They must not eat here", jp: "ここで食べてはいけません" }
-    ],
+      { en: "You must not smoke here", jp: "ここでたばこを吸ってはいけません" },
+      { en: "They must not enter", jp: "彼らは入ってはいけません" },
+      { en: "He must not speak loudly", jp: "彼は大声で話してはいけません" },
+      { en: "You must not use your phone", jp: "携帯電話を使ってはいけません" },
+      { en: "She must not eat sweets", jp: "彼女はお菓子を食べてはいけません" }
+    ]
   };
 
+  // GAME STATE
   let currentSet = [];
   let sentence = "";
   let words = [];
+  let shuffledWords = [];
   let score = 0;
-  let totalSentences = 0;
-  const dropZone = document.getElementById("drop-zone");
-  const wordBank = document.getElementById("word-bank");
-  const tick = document.getElementById("tick");
-  const gameTitle = document.getElementById("game-title");
-  const scoreDisplay = document.getElementById("score");
-  const translation = document.getElementById("translation");
-  const missionTracker = document.getElementById("mission-tracker");
-  const progressBar = document.getElementById("progress-bar");
-  const themeToggle = document.getElementById("themeToggle");
+  let streak = 0;
+  let streakAnimationTimeout;
+  let userName = "";
+  const streakMilestones = [3,5,10];
 
+  // DOM ELEMENTS
+  const startScreen = document.getElementById('start-screen');
+  const gameScreen = document.getElementById('game-screen');
+  const gameTitle = document.getElementById('game-title');
+  const translationEl = document.getElementById('translation');
+  const dropZone = document.getElementById('drop-zone');
+  const wordBank = document.getElementById('word-bank');
+  const tick = document.getElementById('tick');
+  const scoreEl = document.getElementById('score');
+  const missionTracker = document.getElementById('mission-tracker');
+  const nextBtn = document.getElementById('nextBtn');
+  const hintBtn = document.getElementById('hintBtn');
+  const nicknameInput = document.getElementById('nickname');
+  const leaderboardList = document.getElementById('leaderboard-list');
+  const clearProgressBtn = document.getElementById('clearProgressBtn');
+  const progressBar = document.getElementById('progress-bar');
+  const themeToggle = document.getElementById('themeToggle');
+  const confettiContainer = document.getElementById('confetti-container');
+
+  // Save/load from localStorage keys
+  function storageKey(name) {
+    return `unjumble-progress-${name}`;
+  }
+  function storageLeaderboardKey() {
+    return 'unjumble-leaderboard';
+  }
+
+  // THEME TOGGLE
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    themeToggle.textContent = document.body.classList.contains('dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
+  });
+
+  // LOAD LEADERBOARD
+  function loadLeaderboard() {
+    let data = JSON.parse(localStorage.getItem(storageLeaderboardKey())) || {};
+    // Sort descending by stars
+    let entries = Object.entries(data);
+    entries.sort((a,b) => b[1].stars - a[1].stars);
+    leaderboardList.innerHTML = "";
+    entries.slice(0,10).forEach(([name, {stars}]) => {
+      let li = document.createElement('li');
+      li.textContent = `${name}: ${stars} ⭐`;
+      leaderboardList.appendChild(li);
+    });
+  }
+
+  // SAVE TO LEADERBOARD
+  function saveToLeaderboard(name, stars, streak) {
+    if (!name) return;
+    let data = JSON.parse(localStorage.getItem(storageLeaderboardKey())) || {};
+    if (!data[name] || data[name].stars < stars) {
+      data[name] = { stars, streak };
+      localStorage.setItem(storageLeaderboardKey(), JSON.stringify(data));
+    }
+    loadLeaderboard();
+  }
+
+  // CLEAR PROGRESS
+  clearProgressBtn.addEventListener('click', () => {
+    if (!userName) {
+      alert("Please enter your nickname first.");
+      return;
+    }
+    if (confirm(`Clear progress for ${userName}? This cannot be undone.`)) {
+      localStorage.removeItem(storageKey(userName));
+      // Also reset leaderboard entry for this user
+      let data = JSON.parse(localStorage.getItem(storageLeaderboardKey())) || {};
+      delete data[userName];
+      localStorage.setItem(storageLeaderboardKey(), JSON.stringify(data));
+      score = 0; streak = 0;
+      updateScoreDisplay();
+      loadLeaderboard();
+      alert("Progress cleared.");
+    }
+  });
+
+  // START GAME
   function startGame(setName) {
-    document.getElementById("start-screen").classList.remove("active");
-    document.getElementById("game-screen").classList.add("active");
-    gameTitle.textContent = setName;
+    userName = nicknameInput.value.trim();
+    if (!userName) {
+      alert("Please enter a nickname before starting.");
+      return;
+    }
+    // Save progress for user if exists
+    const saved = JSON.parse(localStorage.getItem(storageKey(userName)));
+    if (saved && saved.setName === setName) {
+      score = saved.score || 0;
+      streak = saved.streak || 0;
+      updateScoreDisplay();
+      missionTracker.textContent = `Current streak: ${streak}`;
+    } else {
+      score = 0;
+      streak = 0;
+      updateScoreDisplay();
+      missionTracker.textContent = "";
+    }
+
     currentSet = sentenceSets[setName];
-    score = 0;
-    totalSentences = 0;
-    updateScore();
-    missionTracker.textContent = `Mission: 0 / ${currentSet.length} sentences`;
-    updateProgressBar();
+    sentence = "";
+    words = [];
+    shuffledWords = [];
+    gameTitle.textContent = {
+      future: "未来形 🚀",
+      if: "もし… ☁️",
+      when: "〜するとき ⏰",
+      think: "…と思う 💭",
+      want: "すること１ 💖",
+      purpose: "すること２ 🌱",
+      must: "しなければならない 🔒",
+      mustNot: "してはいけない 🚫"
+    }[setName] || setName;
+
+    startScreen.classList.remove('active');
+    gameScreen.classList.add('active');
     nextSentence();
   }
 
+  // UPDATE SCORE DISPLAY (stars bar)
+  function updateScoreDisplay() {
+    scoreEl.innerHTML = "";
+    for(let i=0; i < score; i++) {
+      const star = document.createElement("span");
+      star.classList.add("star");
+      star.textContent = "⭐";
+      scoreEl.appendChild(star);
+    }
+  }
+
+  // NEXT SENTENCE
   function nextSentence() {
+    // Hide next button initially & tick
+    nextBtn.style.opacity = 0;
+    tick.classList.remove('show');
+    missionTracker.textContent = `Current streak: ${streak}`;
+
+    // Pick random sentence from currentSet
     const entry = currentSet[Math.floor(Math.random() * currentSet.length)];
     sentence = entry.en;
     words = sentence.split(" ");
-    let shuffled = [...words].sort(() => Math.random() - 0.5);
+    shuffledWords = shuffleArray([...words]);
+
+    // Clear UI
     dropZone.innerHTML = "";
     wordBank.innerHTML = "";
-    translation.textContent = entry.jp;
-    tick.style.display = "none";
-    document.getElementById("nextBtn").style.display = "none";
+    translationEl.textContent = entry.jp;
 
-    // Create drop slots
-    for (let i = 0; i < words.length; i++) {
-      const slot = document.createElement("div");
-      slot.classList.add("word-slot");
-      slot.ondragover = e => e.preventDefault();
-      slot.ondrop = function (e) {
-        e.preventDefault();
-        const data = e.dataTransfer.getData("text");
-        const draggedEl = [...wordBank.children].find(el => el.textContent === data);
-        if (draggedEl && slot.children.length === 0) {
-          slot.appendChild(draggedEl);
-          // Snap animation
-          draggedEl.style.transform = "scale(1.2)";
-          setTimeout(() => {
-            draggedEl.style.transform = "scale(1)";
-          }, 200);
-          checkAnswer();
-        }
-      };
+    // Create slots in drop zone (snap targets)
+    for (let i=0; i<words.length; i++) {
+      const slot = document.createElement('div');
+      slot.classList.add('word-slot');
+      slot.dataset.index = i;
       dropZone.appendChild(slot);
     }
 
-    // Add shuffled words to word bank
-    shuffled.forEach(word => {
+    // Create draggable words
+    shuffledWords.forEach(word => {
       const el = document.createElement("div");
       el.textContent = word;
       el.classList.add("word");
@@ -321,96 +706,232 @@
       el.addEventListener("dragstart", dragStart);
       wordBank.appendChild(el);
     });
+
+    updateProgressBar();
   }
 
+  // DRAG & DROP HANDLERS
+  let draggedWord = null;
   function dragStart(e) {
-    e.dataTransfer.setData("text", e.target.textContent);
+    draggedWord = e.target;
+    e.dataTransfer.setData("text/plain", e.target.textContent);
+    // Needed for Firefox
+    e.dataTransfer.effectAllowed = "move";
   }
-
-  function checkAnswer() {
-    const current = [...dropZone.children].map(slot => slot.children[0]?.textContent || "").join(" ").trim();
-    [...dropZone.children].forEach((slot, idx) => {
-      const el = slot.children[0];
-      if (el) {
-        el.classList.remove("correct", "wrong");
-        el.classList.add(el.textContent === words[idx] ? "correct" : "wrong");
+  function allowDrop(e) {
+    e.preventDefault();
+  }
+  function drop(e) {
+    e.preventDefault();
+    if (!draggedWord) return;
+    if (e.target.classList.contains("word-slot")) {
+      // If slot already has a word, return it to wordBank first
+      if (e.target.firstChild) {
+        wordBank.appendChild(e.target.firstChild);
       }
-    });
-    if (current === sentence) {
-      tick.style.display = "block";
-      score++;
-      totalSentences++;
-      updateScore();
-      missionTracker.textContent = `Mission: ${totalSentences} / ${currentSet.length} sentences`;
-      updateProgressBar();
-      document.getElementById("nextBtn").style.display = "inline-block";
-      speakSentence();
-    } else {
-      tick.style.display = "none";
-    }
-  }
-
-  function updateScore() {
-    scoreDisplay.innerHTML = "";
-    for (let i = 0; i < score; i++) {
-      const star = document.createElement("span");
-      star.textContent = "⭐";
-      star.style.fontSize = "1.8rem";
-      star.style.margin = "0 3px";
-      scoreDisplay.appendChild(star);
-    }
-  }
-
-  function updateProgressBar() {
-    if (currentSet.length === 0) {
-      progressBar.style.width = "0%";
-      return;
-    }
-    const percent = (totalSentences / currentSet.length) * 100;
-    progressBar.style.width = percent + "%";
-  }
-
-  function showHint() {
-    const firstWord = words[0];
-    const hintEl = [...wordBank.children].find(el => el.textContent === firstWord);
-    const firstSlot = [...dropZone.children][0];
-    if (hintEl && firstSlot && firstSlot.children.length === 0) {
-      firstSlot.appendChild(hintEl);
-      // Animate hint word to glow briefly
-      hintEl.style.transition = "box-shadow 0.6s ease-in-out";
-      hintEl.style.boxShadow = "0 0 8px 3px #ffdd55";
-      setTimeout(() => {
-        hintEl.style.boxShadow = "";
-      }, 1200);
+      e.target.appendChild(draggedWord);
       checkAnswer();
     }
   }
 
+  dropZone.addEventListener("dragover", allowDrop);
+  dropZone.addEventListener("drop", drop);
+
+  // CHECK ANSWER
+  function checkAnswer() {
+    const arrangedWords = [];
+    // Gather words in slots by index order
+    const slots = [...dropZone.children];
+    for(let slot of slots) {
+      arrangedWords.push(slot.firstChild ? slot.firstChild.textContent : "");
+    }
+    // Color code correct/wrong words
+    slots.forEach((slot, i) => {
+      if (!slot.firstChild) {
+        slot.style.borderColor = "#ccc";
+        return;
+      }
+      if (slot.firstChild.textContent === words[i]) {
+        slot.style.borderColor = "#28a745"; // green
+      } else {
+        slot.style.borderColor = "#dc3545"; // red
+      }
+    });
+
+    // Check full sentence
+    if (arrangedWords.join(" ") === sentence) {
+      tick.classList.add('show');
+      nextBtn.style.opacity = 1;
+      addStar();
+      streak++;
+      missionTracker.textContent = `Current streak: ${streak}`;
+      saveProgress();
+      showStreakBonusIfNeeded();
+      playConfetti();
+      speakSentence();
+    } else {
+      tick.classList.remove('show');
+      nextBtn.style.opacity = 0;
+      streak = 0;
+      missionTracker.textContent = `Current streak: ${streak}`;
+      saveProgress();
+    }
+  }
+
+  // SHOW HINT - first word snap
+  function showHint() {
+    // Check if first slot empty, fill with first word from original sentence if present in wordBank
+    const firstSlot = dropZone.children[0];
+    if (firstSlot && !firstSlot.firstChild) {
+      const hintWord = words[0];
+      const candidate = [...wordBank.children].find(el => el.textContent === hintWord);
+      if (candidate) {
+        firstSlot.appendChild(candidate);
+        checkAnswer();
+      }
+    }
+  }
+
+  // REPLAY AUDIO
   function speakSentence() {
+    if (!window.speechSynthesis) return;
     const utterance = new SpeechSynthesisUtterance(sentence);
     const voices = speechSynthesis.getVoices();
-    const aussieVoice = voices.find(v => v.lang === "en-AU");
+    const aussieVoice = voices.find(v => v.lang === "en-AU") || voices.find(v => v.lang.startsWith("en"));
     if (aussieVoice) utterance.voice = aussieVoice;
+    speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
   }
-
   function replayAudio() {
-    const current = [...dropZone.children].map(slot => slot.children[0]?.textContent || "").join(" ").trim();
-    if (current === sentence) {
-      speakSentence();
+    const arrangedWords = Array.from(dropZone.children).map(slot => slot.firstChild?.textContent || "").join(" ");
+    if (arrangedWords === sentence) speakSentence();
+  }
+
+  // SAVE PROGRESS to localStorage by nickname
+  function saveProgress() {
+    if (!userName) return;
+    const data = {
+      setName: gameTitle.textContent,
+      score,
+      streak,
+    };
+    localStorage.setItem(storageKey(userName), JSON.stringify(data));
+    saveToLeaderboard(userName, score, streak);
+  }
+
+  // ADD STAR (visual & score)
+  function addStar() {
+    score++;
+    updateScoreDisplay();
+    animateLatestStar();
+    updateProgressBar();
+  }
+  function updateProgressBar() {
+    const total = currentSet.length;
+    const percent = Math.min(100, (score / total) * 100);
+    progressBar.style.width = percent + "%";
+  }
+
+  // Animate the latest star with pop & burst
+  function animateLatestStar() {
+    const stars = scoreEl.querySelectorAll(".star");
+    if (stars.length === 0) return;
+    const latestStar = stars[stars.length -1];
+    latestStar.classList.add("popburst");
+    setTimeout(() => {
+      latestStar.classList.remove("popburst");
+    }, 500);
+  }
+
+  // Show streak bonus star sparkle if milestone hit
+  function showStreakBonusIfNeeded() {
+    if (streakMilestones.includes(streak)) {
+      const star = document.createElement("span");
+      star.textContent = "🌟";
+      star.style.position = "fixed";
+      star.style.top = "70px";
+      star.style.right = "20px";
+      star.style.fontSize = "3rem";
+      star.style.opacity = "1";
+      star.style.transition = "opacity 1.2s ease";
+      document.body.appendChild(star);
+      setTimeout(() => {
+        star.style.opacity = "0";
+        setTimeout(() => {
+          document.body.removeChild(star);
+        }, 1200);
+      }, 800);
+      // Bonus stars
+      for(let i=0; i<2; i++) addStar();
     }
   }
 
-  themeToggle.onclick = () => {
-    document.body.classList.toggle("dark");
-    if(document.body.classList.contains("dark")){
-      themeToggle.textContent = "☀️ Light Mode";
-    } else {
-      themeToggle.textContent = "🌙 Dark Mode";
+  // Confetti animation for celebration
+  function playConfetti() {
+    const confettiCount = 30;
+    for(let i=0; i < confettiCount; i++) {
+      const confetti = document.createElement("div");
+      confetti.classList.add("confetti");
+      confetti.style.left = Math.random() * window.innerWidth + "px";
+      confetti.style.top = "-10px";
+      confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 70%)`;
+      confetti.style.animationDuration = (2 + Math.random()*2) + "s";
+      confetti.style.transform = `rotate(${Math.random()*360}deg)`;
+      confettiContainer.appendChild(confetti);
+      setTimeout(() => {
+        confetti.remove();
+      }, 4000);
     }
-  };
+  }
 
+  // SHUFFLE ARRAY
+  function shuffleArray(arr) {
+    let a = arr.slice();
+    for(let i = a.length -1; i > 0; i--) {
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // EVENT LISTENERS FOR START SCREEN BUTTONS
+  document.querySelectorAll(".grammar-button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      startGame(btn.dataset.set);
+    });
+  });
+
+  // NICKNAME INPUT saves to variable
+  nicknameInput.addEventListener("change", () => {
+    userName = nicknameInput.value.trim();
+    loadUserProgress(userName);
+  });
+
+  // LOAD USER PROGRESS ON NICKNAME ENTER
+  function loadUserProgress(name) {
+    if (!name) return;
+    const saved = JSON.parse(localStorage.getItem(storageKey(name)));
+    if (saved) {
+      score = saved.score || 0;
+      streak = saved.streak || 0;
+      updateScoreDisplay();
+      missionTracker.textContent = `Current streak: ${streak}`;
+    } else {
+      score = 0;
+      streak = 0;
+      updateScoreDisplay();
+      missionTracker.textContent = "";
+    }
+  }
+
+  // CLEAR PROGRESS BUTTON handled above
+
+  // INIT
+  loadLeaderboard();
+
+  // Preload voices for speech synthesis
   window.speechSynthesis.onvoiceschanged = () => {};
+
 </script>
 </body>
 </html>
