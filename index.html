@@ -1,195 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Drag-and-Drop Vocabulary Match</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unjumble the Sentence</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5faff;
-      padding: 2rem;
+      font-family: 'Comic Neue', sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 0;
       text-align: center;
     }
+    #start-screen, #game-screen {
+      display: none;
+      padding: 20px;
+    }
+    #start-screen.active, #game-screen.active {
+      display: block;
+    }
     h1 {
-      margin-bottom: 2rem;
+      font-size: 2em;
+      margin: 1rem;
     }
-    .container {
-      display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap;
-    }
-    .column {
-      width: 45%;
-    }
-    .card {
-      padding: 1rem;
-      margin: 0.5rem;
-      background-color: #ffffff;
-      border: 2px solid #0077cc;
-      border-radius: 10px;
-      cursor: grab;
-      user-select: none;
-    }
-    .card.dropzone {
-      border-style: dashed;
-      min-height: 2rem;
-      cursor: default;
-    }
-    .card.correct {
-      background-color: #c8e6c9;
-      border-color: green;
-      cursor: default;
-    }
-    .card.incorrect {
-      background-color: #ffcdd2;
-      border-color: red;
-    }
-    #reset-btn {
-      margin-top: 2rem;
-      padding: 0.5rem 1.2rem;
-      font-size: 1rem;
-    }
-    button.speaker {
-      margin-left: 10px;
+    .grammar-button {
+      font-size: 1.2rem;
+      margin: 10px;
+      padding: 10px 20px;
       cursor: pointer;
       border: none;
-      background: transparent;
+      border-radius: 10px;
+      background: #a2d2ff;
+    }
+    #word-bank, #drop-zone {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px;
+    }
+    .word {
+      font-size: 2rem;
+      padding: 10px;
+      cursor: grab;
+      border-radius: 10px;
+      user-select: none;
+    }
+    .word.correct { color: green; }
+    .word.wrong { color: red; }
+    button {
       font-size: 1rem;
+      margin: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    #tick {
+      font-size: 3rem;
+      color: green;
+      display: none;
+      animation: pop 0.5s ease-in-out;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <h1>Match English to Japanese (Drag and Drop)</h1>
-  <div class="container">
-    <div class="column" id="english-column">
-      <h2>English</h2>
-    </div>
-    <div class="column" id="japanese-column">
-      <h2>Japanese</h2>
+  <div id="start-screen" class="active">
+    <h1>文法を選ぼう</h1>
+    <div>
+      <button class="grammar-button" onclick="startGame('future')">未来形</button>
+      <button class="grammar-button" onclick="startGame('if')">もし…</button>
+      <button class="grammar-button" onclick="startGame('when')">〜するとき</button>
+      <button class="grammar-button" onclick="startGame('think')">…と思う</button>
+      <button class="grammar-button" onclick="startGame('want')">すること１</button>
+      <button class="grammar-button" onclick="startGame('purpose')">すること２</button>
+      <button class="grammar-button" onclick="startGame('must')">しなければならない</button>
+      <button class="grammar-button" onclick="startGame('mustNot')">してはいけない</button>
     </div>
   </div>
-  <button id="reset-btn">Reset</button>
+
+  <div id="game-screen">
+    <h1 id="game-title"></h1>
+    <div id="drop-zone"></div>
+    <div id="word-bank"></div>
+    <button onclick="showHint()">💡 Hint</button>
+    <button onclick="replayAudio()">🔊 Replay</button>
+    <div id="tick">✔️</div>
+  </div>
 
   <script>
-    const vocab = [
-      { english: "cat", japanese: "ねこ" },
-      { english: "dog", japanese: "いぬ" },
-      { english: "water", japanese: "みず" },
-      { english: "book", japanese: "ほん" },
-      { english: "school", japanese: "がっこう" },
-      { english: "apple", japanese: "りんご" },
-      { english: "friend", japanese: "ともだち" }
-    ];
+    const sentenceSets = {
+      future: ["I will play soccer tomorrow", "She will visit her grandmother next week", "They will have lunch at noon"],
+      if: ["If it rains, we will stay home", "If you are hungry, eat lunch", "If he studies, he will pass the test"],
+      when: ["I brush my teeth when I get up", "When she is free, she reads books", "I listen to music when I do my homework"],
+      think: ["I think English is interesting", "I think he is kind", "I think she will come"],
+      want: ["I want to play baseball", "She wants to eat sushi", "They want to visit Tokyo"],
+      purpose: ["I study hard to pass the test", "He practices soccer to win the game", "I get up early to catch the bus"],
+      must: ["I must do my homework", "We must clean the room", "She must study for the test"],
+      mustNot: ["You must not run in the hallway", "We must not talk in the library", "He must not be late"]
+    };
 
-    let draggedItem = null;
-    let matchedPairs = 0;
+    let sentence = "";
+    let words = [];
+    const dropZone = document.getElementById("drop-zone");
+    const wordBank = document.getElementById("word-bank");
+    const tick = document.getElementById("tick");
+    const gameTitle = document.getElementById("game-title");
 
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
+    function startGame(setName) {
+      document.getElementById("start-screen").classList.remove("active");
+      document.getElementById("game-screen").classList.add("active");
+      gameTitle.textContent = setName;
+
+      const set = sentenceSets[setName];
+      sentence = set[Math.floor(Math.random() * set.length)];
+      words = sentence.split(" ");
+      let shuffled = [...words].sort(() => Math.random() - 0.5);
+
+      dropZone.innerHTML = "";
+      wordBank.innerHTML = "";
+      tick.style.display = "none";
+
+      shuffled.forEach(word => {
+        const el = document.createElement("div");
+        el.textContent = word;
+        el.classList.add("word");
+        el.draggable = true;
+        el.addEventListener("dragstart", dragStart);
+        wordBank.appendChild(el);
+      });
     }
 
-    function speakEnglish(text) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
+    function dragStart(e) {
+      e.dataTransfer.setData("text", e.target.textContent);
+    }
+
+    dropZone.addEventListener("dragover", e => e.preventDefault());
+    dropZone.addEventListener("drop", drop);
+
+    function drop(e) {
+      e.preventDefault();
+      const data = e.dataTransfer.getData("text");
+      const draggedEl = [...wordBank.children].find(el => el.textContent === data);
+      if (draggedEl) {
+        dropZone.appendChild(draggedEl);
+        checkAnswer();
+      }
+    }
+
+    function checkAnswer() {
+      const current = [...dropZone.children].map(el => el.textContent).join(" ");
+      [...dropZone.children].forEach((el, idx) => {
+        el.classList.remove("correct", "wrong");
+        if (words[idx]) {
+          el.classList.add(el.textContent === words[idx] ? "correct" : "wrong");
+        }
+      });
+      if (current === sentence) {
+        tick.style.display = "block";
+        speakSentence();
+      } else {
+        tick.style.display = "none";
+      }
+    }
+
+    function showHint() {
+      if (dropZone.children.length === 0) {
+        const firstWord = words[0];
+        const hintEl = [...wordBank.children].find(el => el.textContent === firstWord);
+        if (hintEl) {
+          dropZone.appendChild(hintEl);
+          checkAnswer();
+        }
+      }
+    }
+
+    function speakSentence() {
+      const utterance = new SpeechSynthesisUtterance(sentence);
+      const voices = speechSynthesis.getVoices();
+      const aussieVoice = voices.find(v => v.lang === 'en-AU');
+      if (aussieVoice) utterance.voice = aussieVoice;
       speechSynthesis.speak(utterance);
     }
 
-    function createCard(text, isDropZone = false, matchId = "") {
-      const div = document.createElement("div");
-      div.classList.add("card");
-
-      if (isDropZone) {
-        div.classList.add("dropzone");
-        div.dataset.english = matchId;
-        div.addEventListener("dragover", e => e.preventDefault());
-        div.addEventListener("drop", handleDrop);
-
-        // Add text and speaker
-        const textSpan = document.createElement("span");
-        textSpan.textContent = text;
-
-        const speaker = document.createElement("button");
-        speaker.textContent = "🔊";
-        speaker.className = "speaker";
-        speaker.addEventListener("click", () => speakEnglish(text));
-
-        div.appendChild(textSpan);
-        div.appendChild(speaker);
-
-      } else {
-        // Japanese draggable
-        div.setAttribute("draggable", "true");
-        div.dataset.match = matchId;
-        div.dataset.japanese = text;
-        div.textContent = text;
-
-        div.addEventListener("dragstart", () => {
-          draggedItem = div;
-        });
-      }
-
-      return div;
-    }
-
-    function handleDrop(event) {
-      if (!draggedItem) return;
-
-      const dropTarget = event.currentTarget;
-      const englishWord = dropTarget.dataset.english;
-      const draggedMatch = draggedItem.dataset.match;
-
-      if (englishWord === draggedMatch) {
-        dropTarget.classList.add("correct");
-        dropTarget.textContent = `${englishWord} = ${draggedItem.dataset.japanese}`;
-        draggedItem.remove();
-        matchedPairs++;
-
-        if (matchedPairs === vocab.length) {
-          setTimeout(() => {
-            alert("Great job! All matched!");
-          }, 200);
-        }
-      } else {
-        dropTarget.classList.add("incorrect");
-
-        // Find the correct Japanese word for this English word
-        const correctPair = vocab.find(pair => pair.english === englishWord);
-        setTimeout(() => {
-          dropTarget.classList.remove("incorrect");
-          dropTarget.textContent = `${englishWord} = ${correctPair.japanese} (correct)`;
-          dropTarget.classList.add("correct");
-        }, 1000);
+    function replayAudio() {
+      const current = [...dropZone.children].map(el => el.textContent).join(" ");
+      if (current === sentence) {
+        speakSentence();
       }
     }
 
-    function setupGame() {
-      matchedPairs = 0;
-      const englishColumn = document.getElementById("english-column");
-      const japaneseColumn = document.getElementById("japanese-column");
-      englishColumn.innerHTML = "<h2>English</h2>";
-      japaneseColumn.innerHTML = "<h2>Japanese</h2>";
-
-      const shuffled = shuffle([...vocab]);
-      const shuffledJapanese = shuffle([...vocab]);
-
-      // Create English cards (drop zones)
-      shuffled.forEach(pair => {
-        const dropZone = createCard(pair.english, true, pair.english);
-        englishColumn.appendChild(dropZone);
-      });
-
-      // Create Japanese draggable cards
-      shuffledJapanese.forEach(pair => {
-        const dragItem = createCard(pair.japanese, false, pair.english);
-        japaneseColumn.appendChild(dragItem);
-      });
-    }
-
-    document.getElementById("reset-btn").addEventListener("click", setupGame);
-
-    // Initialize on load
-    setupGame();
+    window.speechSynthesis.onvoiceschanged = () => {};
   </script>
 </body>
 </html>
