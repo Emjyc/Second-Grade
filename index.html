@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>English-Japanese Vocabulary Match</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f0f8ff;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    .word {
+      font-size: 1.5rem;
+      margin: 1rem;
+    }
+    .options {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .option-btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background-color: #fff;
+      border: 2px solid #0077cc;
+      transition: 0.3s;
+    }
+    .option-btn:hover {
+      background-color: #cceeff;
+    }
+    .correct {
+      background-color: #c8e6c9;
+      border-color: green;
+    }
+    .incorrect {
+      background-color: #ffcdd2;
+      border-color: red;
+    }
+    #next-btn {
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      display: none;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Match English to Japanese</h1>
+  <div class="word" id="english-word">Word</div>
+  <div class="options" id="options-container"></div>
+  <button id="next-btn">Next</button>
+
+  <script>
+    const vocab = [
+      { english: "cat", japanese: "ねこ" },
+      { english: "dog", japanese: "いぬ" },
+      { english: "water", japanese: "みず" },
+      { english: "book", japanese: "ほん" },
+      { english: "school", japanese: "がっこう" },
+      { english: "apple", japanese: "りんご" },
+      { english: "friend", japanese: "ともだち" }
+    ];
+
+    let currentWord = {};
+    const wordDiv = document.getElementById("english-word");
+    const optionsContainer = document.getElementById("options-container");
+    const nextBtn = document.getElementById("next-btn");
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function loadWord() {
+      optionsContainer.innerHTML = "";
+      nextBtn.style.display = "none";
+
+      currentWord = vocab[Math.floor(Math.random() * vocab.length)];
+      wordDiv.textContent = currentWord.english;
+
+      const choices = shuffle([
+        currentWord.japanese,
+        ...shuffle(vocab.filter(v => v !== currentWord)).slice(0, 3).map(v => v.japanese)
+      ]);
+
+      choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.textContent = choice;
+        btn.classList.add("option-btn");
+        btn.addEventListener("click", () => checkAnswer(btn, choice));
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(button, choice) {
+      const buttons = document.querySelectorAll(".option-btn");
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (choice === currentWord.japanese) {
+        button.classList.add("correct");
+      } else {
+        button.classList.add("incorrect");
+        buttons.forEach(btn => {
+          if (btn.textContent === currentWord.japanese) {
+            btn.classList.add("correct");
+          }
+        });
+      }
+      nextBtn.style.display = "inline-block";
+    }
+
+    nextBtn.addEventListener("click", loadWord);
+
+    // Start game
+    loadWord();
+  </script>
+</body>
+</html>
