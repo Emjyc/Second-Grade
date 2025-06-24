@@ -105,8 +105,10 @@
     animation: pop 0.5s ease-in-out;
   }
   #score {
-    font-size: 1.2rem;
+    font-size: 2rem;
     margin-top: 10px;
+    min-height: 2.5rem;
+    letter-spacing: 4px;
   }
   #translation {
     font-size: 1.5rem;
@@ -271,7 +273,7 @@
     currentSet = sentenceSets[setName];
     score = 0;
     totalSentences = 0;
-    scoreDisplay.innerHTML = "🍓 0 points";
+    updateScore();
     missionTracker.textContent = `Mission: 0 / ${currentSet.length} sentences`;
     updateProgressBar();
     nextSentence();
@@ -338,13 +340,24 @@
       tick.style.display = "block";
       score++;
       totalSentences++;
-      scoreDisplay.innerHTML = `🍓 ${score} points`;
+      updateScore();
       missionTracker.textContent = `Mission: ${totalSentences} / ${currentSet.length} sentences`;
       updateProgressBar();
       document.getElementById("nextBtn").style.display = "inline-block";
       speakSentence();
     } else {
       tick.style.display = "none";
+    }
+  }
+
+  function updateScore() {
+    scoreDisplay.innerHTML = "";
+    for (let i = 0; i < score; i++) {
+      const star = document.createElement("span");
+      star.textContent = "⭐";
+      star.style.fontSize = "1.8rem";
+      star.style.margin = "0 3px";
+      scoreDisplay.appendChild(star);
     }
   }
 
