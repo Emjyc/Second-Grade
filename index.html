@@ -85,4 +85,111 @@
     let draggedItem = null;
     let matchedPairs = 0;
 
-    function
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function speakEnglish(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      speechSynthesis.speak(utterance);
+    }
+
+    function createCard(text, isDropZone = false, matchId = "") {
+      const div = document.createElement("div");
+      div.classList.add("card");
+
+      if (isDropZone) {
+        div.classList.add("dropzone");
+        div.dataset.english = matchId;
+        div.addEventListener("dragover", e => e.preventDefault());
+        div.addEventListener("drop", handleDrop);
+
+        // Add text and speaker
+        const textSpan = document.createElement("span");
+        textSpan.textContent = text;
+
+        const speaker = document.createElement("button");
+        speaker.textContent = "🔊";
+        speaker.className = "speaker";
+        speaker.addEventListener("click", () => speakEnglish(text));
+
+        div.appendChild(textSpan);
+        div.appendChild(speaker);
+
+      } else {
+        // Japanese draggable
+        div.setAttribute("draggable", "true");
+        div.dataset.match = matchId;
+        div.dataset.japanese = text;
+        div.textContent = text;
+
+        div.addEventListener("dragstart", () => {
+          draggedItem = div;
+        });
+      }
+
+      return div;
+    }
+
+    function handleDrop(event) {
+      if (!draggedItem) return;
+
+      const dropTarget = event.currentTarget;
+      const englishWord = dropTarget.dataset.english;
+      const draggedMatch = draggedItem.dataset.match;
+
+      if (englishWord === draggedMatch) {
+        dropTarget.classList.add("correct");
+        dropTarget.textContent = `${englishWord} = ${draggedItem.dataset.japanese}`;
+        draggedItem.remove();
+        matchedPairs++;
+
+        if (matchedPairs === vocab.length) {
+          setTimeout(() => {
+            alert("Great job! All matched!");
+          }, 200);
+        }
+      } else {
+        dropTarget.classList.add("incorrect");
+
+        // Find the correct Japanese word for this English word
+        const correctPair = vocab.find(pair => pair.english === englishWord);
+        setTimeout(() => {
+          dropTarget.classList.remove("incorrect");
+          dropTarget.textContent = `${englishWord} = ${correctPair.japanese} (correct)`;
+          dropTarget.classList.add("correct");
+        }, 1000);
+      }
+    }
+
+    function setupGame() {
+      matchedPairs = 0;
+      const englishColumn = document.getElementById("english-column");
+      const japaneseColumn = document.getElementById("japanese-column");
+      englishColumn.innerHTML = "<h2>English</h2>";
+      japaneseColumn.innerHTML = "<h2>Japanese</h2>";
+
+      const shuffled = shuffle([...vocab]);
+      const shuffledJapanese = shuffle([...vocab]);
+
+      // Create English cards (drop zones)
+      shuffled.forEach(pair => {
+        const dropZone = createCard(pair.english, true, pair.english);
+        englishColumn.appendChild(dropZone);
+      });
+
+      // Create Japanese draggable cards
+      shuffledJapanese.forEach(pair => {
+        const dragItem = createCard(pair.japanese, false, pair.english);
+        japaneseColumn.appendChild(dragItem);
+      });
+    }
+
+    document.getElementById("reset-btn").addEventListener("click", setupGame);
+
+    // Initialize on load
+    setupGame();
+  </script>
+</body>
+</html>
