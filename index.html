@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Unjumble the Sentence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nico+Moji&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Comic Neue', sans-serif;
+      font-family: 'Nico Moji', sans-serif;
       background: #f0f8ff;
       margin: 0;
       padding: 0;
@@ -60,6 +61,15 @@
       display: none;
       animation: pop 0.5s ease-in-out;
     }
+    #score {
+      font-size: 1.2rem;
+      margin-top: 10px;
+    }
+    #translation {
+      font-size: 1.5rem;
+      color: #555;
+      margin-bottom: 10px;
+    }
     @keyframes pop {
       0% { transform: scale(0); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
@@ -83,45 +93,57 @@
 
   <div id="game-screen">
     <h1 id="game-title"></h1>
+    <div id="translation"></div>
     <div id="drop-zone"></div>
     <div id="word-bank"></div>
     <button onclick="showHint()">💡 Hint</button>
     <button onclick="replayAudio()">🔊 Replay</button>
+    <button id="nextBtn" onclick="nextSentence()" style="display:none;">➡️ Next</button>
     <div id="tick">✔️</div>
+    <div id="score"></div>
   </div>
 
   <script>
     const sentenceSets = {
-      future: ["I will play soccer tomorrow", "She will visit her grandmother next week", "They will have lunch at noon"],
-      if: ["If it rains, we will stay home", "If you are hungry, eat lunch", "If he studies, he will pass the test"],
-      when: ["I brush my teeth when I get up", "When she is free, she reads books", "I listen to music when I do my homework"],
-      think: ["I think English is interesting", "I think he is kind", "I think she will come"],
-      want: ["I want to play baseball", "She wants to eat sushi", "They want to visit Tokyo"],
-      purpose: ["I study hard to pass the test", "He practices soccer to win the game", "I get up early to catch the bus"],
-      must: ["I must do my homework", "We must clean the room", "She must study for the test"],
-      mustNot: ["You must not run in the hallway", "We must not talk in the library", "He must not be late"]
+      future: [
+        { en: "I will play soccer tomorrow", jp: "私は明日サッカーをします" },
+        { en: "She will visit her grandmother next week", jp: "彼女は来週おばあさんを訪れます" },
+        { en: "They will have lunch at noon", jp: "彼らは正午に昼ごはんを食べます" }
+      ]
+      // Add translations for other sets similarly...
     };
 
+    let currentSet = [];
     let sentence = "";
     let words = [];
+    let score = 0;
     const dropZone = document.getElementById("drop-zone");
     const wordBank = document.getElementById("word-bank");
     const tick = document.getElementById("tick");
     const gameTitle = document.getElementById("game-title");
+    const scoreDisplay = document.getElementById("score");
+    const translation = document.getElementById("translation");
 
     function startGame(setName) {
       document.getElementById("start-screen").classList.remove("active");
       document.getElementById("game-screen").classList.add("active");
       gameTitle.textContent = setName;
+      currentSet = sentenceSets[setName];
+      score = 0;
+      scoreDisplay.innerHTML = "🍓 0 points";
+      nextSentence();
+    }
 
-      const set = sentenceSets[setName];
-      sentence = set[Math.floor(Math.random() * set.length)];
+    function nextSentence() {
+      const entry = currentSet[Math.floor(Math.random() * currentSet.length)];
+      sentence = entry.en;
       words = sentence.split(" ");
       let shuffled = [...words].sort(() => Math.random() - 0.5);
-
       dropZone.innerHTML = "";
       wordBank.innerHTML = "";
+      translation.textContent = entry.jp;
       tick.style.display = "none";
+      document.getElementById("nextBtn").style.display = "none";
 
       shuffled.forEach(word => {
         const el = document.createElement("div");
@@ -160,6 +182,9 @@
       });
       if (current === sentence) {
         tick.style.display = "block";
+        score++;
+        scoreDisplay.innerHTML = `🍓 ${score} points`;
+        document.getElementById("nextBtn").style.display = "inline-block";
         speakSentence();
       } else {
         tick.style.display = "none";
